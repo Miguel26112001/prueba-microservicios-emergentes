@@ -51,7 +51,7 @@ public class OrderDetail extends AuditableModel {
 
   @Column(nullable = false, precision = 10, scale = 2)
   @NotNull(message = "Subtotal is required")
-  @DecimalMin(value = "0.00", inclusive = true, message = "Subtotal cannot be negative")
+  @DecimalMin(value = "0.00", message = "Subtotal cannot be negative")
   @Digits(integer = 8, fraction = 2, message = "Subtotal format is invalid")
   @Schema(
     description = "Subtotal amount for this line (price x quantity)",

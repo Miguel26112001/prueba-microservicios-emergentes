@@ -52,7 +52,7 @@ public class Order extends AuditableAbstractAggregateRoot<Order> {
 
   @Column(nullable = false, precision = 12, scale = 2)
   @NotNull(message = "Total is required")
-  @DecimalMin(value = "0.00", inclusive = true, message = "Total cannot be negative")
+  @DecimalMin(value = "0.00", message = "Total cannot be negative")
   @Digits(integer = 10, fraction = 2, message = "Total format is invalid")
   @Schema(
     description = "Total amount of the order",
