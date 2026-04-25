@@ -4,6 +4,8 @@ import com.example.sales.products.domain.model.aggregates.Product;
 import com.example.sales.products.infrastructure.persistence.jpa.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 /**
  * Facade exposed by Products bounded context
  * to be consumed internally by other bounded contexts (Orders, etc.)
@@ -20,7 +22,7 @@ public class ProductsContextFacade {
   /**
    * Returns product or throws if it does not exist
    */
-  public Product getProductById(Long productId) {
+  private Product getProductById(Long productId) {
     return productRepository.findById(productId)
       .orElseThrow(() ->
         new RuntimeException("Product with id %d not found".formatted(productId))
@@ -32,6 +34,11 @@ public class ProductsContextFacade {
    */
   public boolean existsProduct(Long productId) {
     return productRepository.existsById(productId);
+  }
+
+  public BigDecimal getProductPrice(Long productId) {
+    var product = getProductById(productId);
+    return product.getPrice();
   }
 
   /**

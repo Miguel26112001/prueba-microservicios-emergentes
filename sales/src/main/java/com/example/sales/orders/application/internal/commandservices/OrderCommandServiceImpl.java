@@ -7,6 +7,7 @@ import com.example.sales.orders.domain.model.commands.OrderDetailCommand;
 import com.example.sales.orders.domain.model.commands.UpdateOrderCommand;
 import com.example.sales.orders.domain.model.entities.OrderDetail;
 import com.example.sales.orders.domain.services.OrderCommandService;
+import com.example.sales.orders.domain.services.ProductExternalService;
 import com.example.sales.orders.infrastructure.persistence.jpa.repositories.OrderRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,13 @@ import java.util.Optional;
 public class OrderCommandServiceImpl implements OrderCommandService {
 
   private final OrderRepository orderRepository;
+  private final ProductExternalService productExternalService;
 
-  public OrderCommandServiceImpl(OrderRepository orderRepository) {
+  public OrderCommandServiceImpl(
+    OrderRepository orderRepository,
+    ProductExternalService productExternalService) {
     this.orderRepository = orderRepository;
+    this.productExternalService = productExternalService;
   }
 
   @Override
@@ -51,9 +56,8 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     }
 
     var order = orderOptional.get();
-    order.setUserId(command.userId());
-    order.getDetails().clear();
 
+    restoreStock(order);
     applyDetails(order, command.details());
 
     var updatedOrder = orderRepository.save(order);
@@ -63,9 +67,15 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
   @Override
   public void handle(DeleteOrderCommand command) {
-    if (orderRepository.existsById(command.orderId())) {
-      orderRepository.deleteById(command.orderId());
+    var order = orderRepository.findById(command.orderId())
+      .orElse(null);
+
+    if (order == null) {
+      return;
     }
+
+    restoreStock(order);
+    orderRepository.delete(order);
   }
 
   private void applyDetails(
@@ -76,15 +86,49 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     order.getDetails().clear();
 
     for (OrderDetailCommand detailCommand : detailCommands) {
+
+      Long productId = detailCommand.productId();
+      Integer quantity = detailCommand.quantity();
+
+      validateProduct(productId, quantity);
+
+      BigDecimal price = productExternalService.getProductPrice(productId);
+      BigDecimal subtotal = price.multiply(BigDecimal.valueOf(quantity));
+
       var detail = OrderDetail.builder()
-        .productId(detailCommand.productId())
-        .quantity(detailCommand.quantity())
-        .subtotal(detailCommand.subtotal())
+        .productId(productId)
+        .quantity(quantity)
+        .subtotal(subtotal)
         .build();
 
       order.addDetail(detail);
+
+      productExternalService.reduceStock(productId, quantity);
     }
 
     order.calculateTotal();
+  }
+
+  private void restoreStock(Order order) {
+
+    for (var detail : order.getDetails()) {
+      productExternalService.increaseStock(
+        detail.getProductId(),
+        detail.getQuantity()
+      );
+    }
+
+    order.getDetails().clear();
+  }
+
+  private void validateProduct(Long productId, Integer quantity) {
+
+    if (!productExternalService.existsProduct(productId)) {
+      throw new RuntimeException("Product with id " + productId + " does not exist");
+    }
+
+    if (!productExternalService.hasStock(productId, quantity)) {
+      throw new RuntimeException("Insufficient stock for product id " + productId);
+    }
   }
 }

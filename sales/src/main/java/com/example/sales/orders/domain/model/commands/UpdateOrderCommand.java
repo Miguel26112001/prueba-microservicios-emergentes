@@ -7,7 +7,6 @@ import java.util.List;
  */
 public record UpdateOrderCommand(
   Long orderId,
-  Long userId,
   List<OrderDetailCommand> details
 ) {
 }

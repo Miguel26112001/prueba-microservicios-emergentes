@@ -7,7 +7,5 @@ import java.math.BigDecimal;
  */
 public record OrderDetailCommand(
   Long productId,
-  Integer quantity,
-  BigDecimal subtotal
-) {
+  Integer quantity) {
 }
