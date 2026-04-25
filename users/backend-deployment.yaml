@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: miguel26112001/user-service:latest
+          ports:
+            - containerPort: 3000 # O el puerto que use tu app
+          env:
+            - name: SERVER_PORT
+              value: "3000"
+            - name: DATABASE_URL
+              value: "jdbc:postgresql://postgres-service:5432/users"
+            - name: DATABASE_USERNAME
+              value: "postgres"
+            - name: DATABASE_PASSWORD
+              value: "mi-clave-segura"

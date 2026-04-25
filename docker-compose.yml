@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  postgres-users:
+    image: postgres:16
+    container_name: postgres-users
+    restart: always
+    environment:
+      POSTGRES_DB: users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - users_data:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+
+  postgres-orders:
+    image: postgres:16
+    container_name: postgres-orders
+    restart: always
+    environment:
+      POSTGRES_DB: orders
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - orders_data:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+
+  users-service:
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    container_name: users-service
+    depends_on:
+      - postgres-users
+    ports:
+      - "8050:8080"
+    environment:
+      SERVER_PORT: 8080
+      DATABASE_URL: jdbc:postgresql://postgres-users:5432/users
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+
+volumes:
+  users_data:
+  orders_data:
