@@ -630,9 +630,9 @@ public class ProductController {
       description = "Retrieves a specific product by their name. Returns detailed information if found.",
       parameters = {
           @Parameter(
-              name = "name",
+              name = "productName",
               description = "Name of the product to retrieve",
-              example = "Laptop Lenovo IdeaPad Pro",
+              example = "Laptop Lenovo IdeaPad",
               required = true,
               schema = @Schema(type = "string")
           )
@@ -657,6 +657,27 @@ public class ProductController {
                   )
               )
           ),
+          @ApiResponse(
+              responseCode = "404",
+              description = "Product not found with the provided product name",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = MessageResource.class),
+                  examples = @ExampleObject(
+                      name = "Product not found",
+                      value = """
+                        {
+                          "timestamp": "2026-04-23T00:17:20.539",
+                          "status": 404,
+                          "error": "Not Found",
+                          "code": "PRODUCT_NOT_FOUND",
+                          "message": "Product with name 'Laptop Lenovo IdeaPad' not found",
+                          "path": "/api/v1/products/name/Laptop%20Lenovo%20IdeaPad"
+                        }
+                        """
+                  )
+              )
+          )
       }
   )
   public ResponseEntity<ProductResource> getProductByName(
