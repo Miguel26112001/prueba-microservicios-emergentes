@@ -1,26 +1,31 @@
 package com.example.users.shared.domain.model.aggregates;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import jakarta.persistence.*;
-import org.springframework.data.domain.AbstractAggregateRoot;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@EntityListeners(AuditingEntityListener.class)
+import org.springframework.data.domain.AbstractAggregateRoot;
+
+@Getter
 @MappedSuperclass
-public class AuditableAbstractAggregateRoot<T extends AbstractAggregateRoot<T>> extends AbstractAggregateRoot<T>{
+public class AuditableAbstractAggregateRoot<T extends AbstractAggregateRoot<T>>
+    extends AbstractAggregateRoot<T> {
+
   @Id
-  @Getter
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Getter
   @Column(nullable = false, updatable = false)
   private OffsetDateTime createdAt;
 
-  @Getter
   @Column(nullable = false)
   private OffsetDateTime updatedAt;
 
