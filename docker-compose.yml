@@ -44,6 +44,36 @@ services:
       retries: 5
 
   # ============================================
+  # RabbitMQ Broker
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: rabbitmq-broker
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+    networks:
+      - microservices-net
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+  # ============================================
   # Eureka Discovery Server
   # ============================================
   discovery-server:
@@ -177,3 +207,7 @@ volumes:
     name: users_data
   sales_data:
     name: sales_data
+  rabbitmq_data:
+    name: rabbitmq_data
+  rabbitmq_logs:
+    name: rabbitmq_logs
