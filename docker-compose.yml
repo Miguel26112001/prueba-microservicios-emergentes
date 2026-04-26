@@ -1,4 +1,8 @@
 services:
+
+  # ============================================
+  # PostgreSQL Databases
+  # ============================================
   postgres-users:
     image: postgres:16
     container_name: postgres-users
@@ -13,6 +17,11 @@ services:
       - users_data:/var/lib/postgresql/data
     networks:
       - microservices-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres-sales:
     image: postgres:16
@@ -28,43 +37,15 @@ services:
       - sales_data:/var/lib/postgresql/data
     networks:
       - microservices-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  users-service:
-    build:
-      context: ./users
-      dockerfile: Dockerfile
-    container_name: users-service
-    depends_on:
-      - postgres-users
-      - discovery-server
-    ports:
-      - "8050:8080"
-    environment:
-      SERVER_PORT: 8080
-      DATABASE_URL: jdbc:postgresql://postgres-users:5432/users
-      DATABASE_USERNAME: postgres
-      DATABASE_PASSWORD: postgres
-    networks:
-      - microservices-net
-
-  sales-service:
-    build:
-      context: ./sales
-      dockerfile: Dockerfile
-    container_name: sales-service
-    depends_on:
-      - postgres-sales
-      - discovery-server
-    ports:
-      - "8060:8080"
-    environment:
-      SERVER_PORT: 8080
-      DATABASE_URL: jdbc:postgresql://postgres-sales:5432/sales
-      DATABASE_USERNAME: postgres
-      DATABASE_PASSWORD: postgres
-    networks:
-      - microservices-net
-
+  # ============================================
+  # Eureka Discovery Server
+  # ============================================
   discovery-server:
     build:
       context: ./discovery-server
@@ -73,25 +54,126 @@ services:
     ports:
       - "8761:8761"
     environment:
-      PORT: 8761
+      SPRING_APPLICATION_NAME: eureka-server
+      SERVER_PORT: 8761
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
     networks:
       - microservices-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
+  # ============================================
+  # API Gateway
+  # ============================================
   api-gateway-server:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
     container_name: api-gateway-server
+    depends_on:
+      discovery-server:
+        condition: service_healthy
     ports:
       - "8040:8040"
     environment:
-      PORT: 8040
+      SPRING_APPLICATION_NAME: api-gateway
+      SERVER_PORT: 8040
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
     networks:
       - microservices-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8040/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+  # ============================================
+  # Users Service
+  # ============================================
+  users-service:
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    container_name: users-service
+    depends_on:
+      postgres-users:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    ports:
+      - "8050:8080"
+    environment:
+      SPRING_APPLICATION_NAME: users-service
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-users:5432/users
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+    networks:
+      - microservices-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+    restart: unless-stopped
+
+  # ============================================
+  # Sales Service
+  # ============================================
+  sales-service:
+    build:
+      context: ./sales
+      dockerfile: Dockerfile
+    container_name: sales-service
+    depends_on:
+      postgres-sales:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    ports:
+      - "8060:8080"
+    environment:
+      SPRING_APPLICATION_NAME: sales-service
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-sales:5432/sales
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+    networks:
+      - microservices-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+    restart: unless-stopped
 
 networks:
   microservices-net:
+    driver: bridge
+    name: microservices-net
 
 volumes:
   users_data:
+    name: users_data
   sales_data:
+    name: sales_data

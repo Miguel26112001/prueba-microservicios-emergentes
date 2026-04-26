@@ -1,28 +1,41 @@
-# ===== Build Stage =====
+# ===========================
+#   EUREKA DISCOVERY SERVER
+# ===========================
+
 FROM maven:3.9.9-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-# Copiar archivos de dependencias primero (cache)
 COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw .
+RUN mvn -q dependency:go-offline -B
 
-RUN mvn dependency:go-offline -B
-
-# Copiar código fuente
 COPY src ./src
+RUN mvn -q clean package -DskipTests
 
-# Compilar jar
-RUN mvn clean package -DskipTests
+# ===========================
+FROM eclipse-temurin:21-jre-alpine
 
-# ===== Run Stage =====
-FROM eclipse-temurin:21-jre
+# Herramientas para healthcheck
+RUN apk add --no-cache curl
+
+RUN addgroup -g 1000 -S eureka && \
+    adduser -u 1000 -S eureka -G eureka
 
 WORKDIR /app
 
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder --chown=eureka:eureka /app/target/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE 8761
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
+  CMD curl -f http://localhost:8761/actuator/health || exit 1
+
+USER eureka
+
+ENTRYPOINT ["java", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "-jar", \
+    "app.jar"]
+
+ENV PORT=8761
