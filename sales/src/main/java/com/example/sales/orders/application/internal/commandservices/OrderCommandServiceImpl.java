@@ -8,6 +8,7 @@ import com.example.sales.orders.domain.model.commands.UpdateOrderCommand;
 import com.example.sales.orders.domain.model.entities.OrderDetail;
 import com.example.sales.orders.domain.services.OrderCommandService;
 import com.example.sales.orders.domain.services.ProductExternalService;
+import com.example.sales.orders.domain.services.UserExternalService;
 import com.example.sales.orders.infrastructure.persistence.jpa.repositories.OrderRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -23,16 +24,23 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
   private final OrderRepository orderRepository;
   private final ProductExternalService productExternalService;
+  private final UserExternalService userExternalService;
 
   public OrderCommandServiceImpl(
-    OrderRepository orderRepository,
-    ProductExternalService productExternalService) {
+      OrderRepository orderRepository,
+      ProductExternalService productExternalService,
+      UserExternalService userExternalService) {
     this.orderRepository = orderRepository;
     this.productExternalService = productExternalService;
+    this.userExternalService = userExternalService;
   }
 
   @Override
   public Optional<Order> handle(CreateOrderCommand command) {
+
+    if (!userExternalService.existsUser(command.userId())) {
+      throw new RuntimeException("User not found");
+    }
 
     var order = Order.builder()
       .userId(command.userId())

@@ -1,4 +1,4 @@
-package com.example.sales.orders.application.external.outboundservices;
+package com.example.sales.orders.application.internal.outboundservices;
 
 import com.example.sales.orders.domain.services.ProductExternalService;
 import com.example.sales.products.interfaces.acl.ProductsContextFacade;
