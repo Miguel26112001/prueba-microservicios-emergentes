@@ -2,7 +2,8 @@ package com.example.users.information.application.internal.commandservices;
 
 import java.util.Optional;
 
-import com.example.users.information.application.integration.events.UserDeletedEventPublisher;
+import com.example.users.information.application.integration.events.UserEventPublisher;
+import com.example.users.information.domain.model.events.UserCreatedEvent;
 import org.springframework.stereotype.Service;
 import com.example.users.information.domain.exceptions.EmailAlreadyExistsException;
 import com.example.users.information.domain.exceptions.UserWithIdNotFoundException;
@@ -17,11 +18,11 @@ import com.example.users.information.infrastructure.persistence.jpa.repositories
 public class UserCommandServiceImpl implements UserCommandService {
 
   private final UserRepository userRepository;
-  private final UserDeletedEventPublisher publisher;
+  private final UserEventPublisher publisher;
 
   public UserCommandServiceImpl(
       UserRepository userRepository,
-      UserDeletedEventPublisher publisher
+      UserEventPublisher publisher
   ) {
     this.userRepository = userRepository;
     this.publisher = publisher;
@@ -35,7 +36,15 @@ public class UserCommandServiceImpl implements UserCommandService {
     }
 
     var newUser = new User(command);
+
     userRepository.save(newUser);
+
+    publisher.publishUserCreated(
+        new UserCreatedEvent(
+            newUser.getName(),
+            newUser.getEmail()
+        )
+    );
 
     return userRepository.findByEmail(command.email());
   }

@@ -10,7 +10,8 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
   public static final String EXCHANGE = "users.exchange";
-  public static final String ROUTING_KEY = "user.deleted";
+  public static final String USER_CREATED_KEY = "user.created";
+  public static final String USER_DELETED_KEY = "user.deleted";
 
   @Bean
   public TopicExchange exchange() {

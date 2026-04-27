@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido</title>
+</head>
+
+<body style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+             background-color:#f4f7f6;
+             margin:0;
+             padding:0;
+             -webkit-font-smoothing:antialiased;">
+
+<div style="padding:20px 0;">
+
+    <table role="presentation"
+           style="width:100%;
+                  max-width:600px;
+                  margin:0 auto;
+                  background-color:#ffffff;
+                  border-radius:8px;
+                  overflow:hidden;
+                  border-collapse:collapse;
+                  border:none;">
+
+        <!-- HEADER -->
+        <tr>
+            <td style="background-color:#2c3e50;
+                       padding:30px;
+                       text-align:center;">
+
+                <h1 style="margin:0;
+                           color:#ffffff;
+                           font-size:24px;
+                           letter-spacing:1px;">
+                    Bienvenido a Nuestra Plataforma
+                </h1>
+
+            </td>
+        </tr>
+
+        <!-- CONTENT -->
+        <tr>
+            <td style="padding:40px 30px;
+                       color:#333333;
+                       line-height:1.6;">
+
+                <h2 style="color:#2c3e50; margin-top:0;">
+                    ¡Hola <span th:text="${name}">Usuario</span>!
+                </h2>
+
+                <p style="margin:0 0 15px 0;">
+                    Gracias por registrarte con nosotros.
+                    Estamos felices de darte la bienvenida.
+                </p>
+
+                <p style="margin:0 0 15px 0;">
+                    Tu cuenta fue creada correctamente y ya puedes
+                    comenzar a disfrutar de nuestros servicios.
+                </p>
+
+                <p style="margin:0 0 15px 0;">
+                    Seguiremos trabajando para brindarte
+                    la mejor experiencia posible.
+                </p>
+
+                <p style="margin:25px 0 0 0;
+                          font-size:14px;
+                          color:#7f8c8d;
+                          border-top:1px solid #eeeeee;
+                          padding-top:15px;">
+                    Este correo fue generado automáticamente.
+                    No es necesario responder a este mensaje.
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="background-color:#f9f9f9;
+                       color:#555555;
+                       padding:20px;
+                       text-align:center;
+                       font-size:12px;
+                       border-top:1px solid #eeeeee;">
+
+                <p style="margin:0 0 10px 0;">
+                    &copy; 2026 Notification Service.
+                    Todos los derechos reservados.
+                </p>
+
+                <p style="margin:0;">
+                    Gracias por confiar en nosotros.
+                </p>
+
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+
+</body>
+</html>
