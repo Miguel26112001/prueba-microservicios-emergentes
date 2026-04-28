@@ -230,7 +230,7 @@ services:
       SENDGRID_HOST: smtp.sendgrid.net
       SENDGRID_PORT: 587
       SENDGRID_USERNAME: apikey
-      SENDGRID_PASSWORD: password
+      SENDGRID_PASSWORD: sengrid-apikey
       MAIL_FROM: miguelgomez26112001@gmail.com
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
@@ -239,6 +239,44 @@ services:
       - microservices-net
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8070/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+    restart: unless-stopped
+
+  # ============================================
+  # Media Service
+  # ============================================
+  media-service:
+    build:
+      context: ./media
+      dockerfile: Dockerfile
+    container_name: media-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    ports:
+      - "8085:8080"
+    environment:
+      SPRING_APPLICATION_NAME: media-service
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      CLOUDINARY_CLOUD_NAME: cloudinary-cloud-name
+      CLOUDINARY_API_KEY: cloudinary-api-key
+      CLOUDINARY_API_SECRET: cloudinary-api-secret
+    networks:
+      - microservices-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8085/actuator/health" ]
       interval: 30s
       timeout: 10s
       retries: 5
