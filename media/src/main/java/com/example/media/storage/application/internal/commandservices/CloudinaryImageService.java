@@ -73,14 +73,16 @@ public class CloudinaryImageService implements ImageService {
 
   @Override
   public void handle(DeleteUserImageCommand command) {
+
+    String publicId = "users/" + command.userId();
     try {
       cloudinary.uploader().destroy(
-          command.publicId(),
+          publicId,
           ObjectUtils.emptyMap()
       );
     } catch (Exception e) {
       throw new RuntimeException(
-          "Error deleting image with public id: " + command.publicId(),
+          "Error deleting image with public id: " + publicId,
           e
       );
     }

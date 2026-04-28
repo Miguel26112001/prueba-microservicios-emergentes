@@ -5,6 +5,7 @@ import com.example.media.storage.domain.model.commands.UploadUserImageCommand;
 import com.example.media.storage.domain.services.ImageService;
 import com.example.media.storage.interfaces.rest.resources.ImageUploadResource;
 import com.example.media.storage.interfaces.rest.transform.ImageUploadResourceFromResponseAssembler;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,12 +43,13 @@ public class ImageController {
     return ResponseEntity.ok(resource);
   }
 
-  @DeleteMapping("/users")
+  @DeleteMapping("/users/{userId}")
   public ResponseEntity<Void> deleteUserImage(
-      @RequestParam String publicId
+      @Parameter(description = "User ID image to delete", example = "1", required = true)
+      @PathVariable Long userId
   ) {
 
-    var command = new DeleteUserImageCommand(publicId);
+    var command = new DeleteUserImageCommand(userId);
 
     imageService.handle(command);
 
