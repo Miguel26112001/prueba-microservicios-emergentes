@@ -47,6 +47,20 @@ public class User extends AuditableAbstractAggregateRoot<User> {
       requiredMode = Schema.RequiredMode.REQUIRED)
   private String email;
 
+  @Column(name = "image_url", length = 500)
+  @Schema(description = "URL of the user's profile image",
+      example = "https://example.com/images/avatar.jpg",
+      maxLength = 500,
+      nullable = true)
+  private String imageUrl;
+
+  @Column(name = "public_id", length = 200)
+  @Schema(description = "Cloud storage public ID for the user's image",
+      example = "users/123/avatar-20241201",
+      maxLength = 200,
+      nullable = true)
+  private String publicId;
+
   public User(CreateUserCommand command) {
     this.name = command.name();
     this.email = command.email();
@@ -57,4 +71,17 @@ public class User extends AuditableAbstractAggregateRoot<User> {
     this.email = command.email();
   }
 
+  public void updateImageInfo(String imageUrl, String publicId) {
+    this.imageUrl = imageUrl;
+    this.publicId = publicId;
+  }
+
+  public void removeImage() {
+    this.imageUrl = null;
+    this.publicId = null;
+  }
+
+  public boolean hasImage() {
+    return this.imageUrl != null && this.publicId != null;
+  }
 }
