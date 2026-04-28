@@ -1,5 +1,6 @@
 package com.example.sales.orders.application.internal.outboundservices;
 
+import com.example.sales.orders.domain.model.valueobjects.ProductData;
 import com.example.sales.orders.domain.services.ProductExternalService;
 import com.example.sales.products.interfaces.acl.ProductsContextFacade;
 import org.springframework.stereotype.Service;
@@ -37,5 +38,15 @@ public class ProductExternalServiceImpl implements ProductExternalService {
   @Override
   public void increaseStock(Long productId, Integer quantity) {
     productContextFacade.increaseStock(productId, quantity);
+  }
+
+  @Override
+  public ProductData getProductData(Long productId) {
+    var product = productContextFacade.getProductById(productId);
+
+    return new ProductData(
+        product.getName(),
+        product.getPrice()
+    );
   }
 }

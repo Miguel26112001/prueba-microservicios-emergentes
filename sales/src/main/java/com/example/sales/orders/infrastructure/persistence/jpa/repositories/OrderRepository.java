@@ -28,4 +28,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     BigDecimal amount
   );
 
+  void deleteByUserId(Long userId);
 }

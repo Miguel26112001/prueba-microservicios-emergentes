@@ -22,7 +22,7 @@ public class ProductsContextFacade {
   /**
    * Returns product or throws if it does not exist
    */
-  private Product getProductById(Long productId) {
+  public Product getProductById(Long productId) {
     return productRepository.findById(productId)
       .orElseThrow(() ->
         new RuntimeException("Product with id %d not found".formatted(productId))
