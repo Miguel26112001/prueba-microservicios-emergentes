@@ -74,7 +74,15 @@ public class CloudinaryImageService implements ImageService {
   @Override
   public void handle(DeleteUserImageCommand command) {
 
+    var userOptional =
+        userExternalService.getUserById(command.userId());
+
+    if (userOptional.isEmpty()) {
+      throw new RuntimeException("User not found");
+    }
+
     String publicId = "users/" + command.userId();
+
     try {
       cloudinary.uploader().destroy(
           publicId,
