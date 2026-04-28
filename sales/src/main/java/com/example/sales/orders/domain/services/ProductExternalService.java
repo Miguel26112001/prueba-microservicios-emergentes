@@ -1,5 +1,7 @@
 package com.example.sales.orders.domain.services;
 
+import com.example.sales.orders.domain.model.valueobjects.ProductData;
+
 import java.math.BigDecimal;
 
 public interface ProductExternalService {
@@ -13,4 +15,6 @@ public interface ProductExternalService {
   void reduceStock(Long productId, Integer quantity);
 
   void increaseStock(Long productId, Integer quantity);
+
+  ProductData getProductData(Long productId);
 }

@@ -1,5 +1,6 @@
 package com.example.notifications.emails.application.internal.services;
 
+import com.example.notifications.emails.domain.model.events.OrderCreatedEvent;
 import com.example.notifications.emails.domain.services.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -58,6 +59,42 @@ public class SendGridEmailService implements EmailService {
 
     } catch (MessagingException e) {
       throw new RuntimeException("Error sending email", e);
+    }
+  }
+
+  @Override
+  public void sendOrderCreatedEmail(OrderCreatedEvent event) {
+    try {
+      MimeMessage message = mailSender.createMimeMessage();
+
+      MimeMessageHelper helper =
+          new MimeMessageHelper(
+              message,
+              MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+              StandardCharsets.UTF_8.name()
+          );
+
+      Context context = new Context();
+      context.setVariable("name", event.name());
+      context.setVariable("orderDate", event.orderDate());
+      context.setVariable("total", event.total());
+      context.setVariable("items", event.items());
+
+      String html =
+          templateEngine.process(
+              "order-created-email",
+              context
+          );
+
+      helper.setFrom(from);
+      helper.setTo(event.email());
+      helper.setSubject("Confirmación de compra");
+      helper.setText(html, true);
+
+      mailSender.send(message);
+
+    } catch (MessagingException e) {
+      throw new RuntimeException("Error sending order email", e);
     }
   }
 }

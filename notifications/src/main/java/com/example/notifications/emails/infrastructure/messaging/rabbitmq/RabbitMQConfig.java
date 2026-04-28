@@ -11,28 +11,67 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-  public static final String EXCHANGE = "users.exchange";
+  // ==========================================
+  // USERS EVENTS
+  // ==========================================
+  public static final String USERS_EXCHANGE = "users.exchange";
   public static final String USER_CREATED_KEY = "user.created";
-  public static final String QUEUE = "notification.user.created.queue";
+  public static final String USER_CREATED_QUEUE =
+      "notification.user.created.queue";
 
+  // ==========================================
+  // ORDERS EVENTS
+  // ==========================================
+  public static final String ORDERS_EXCHANGE = "orders.exchange";
+  public static final String ORDER_CREATED_KEY = "order.created";
+  public static final String ORDER_CREATED_QUEUE =
+      "notification.order.created.queue";
+
+  // ==========================================
+  // USERS CONFIG
+  // ==========================================
   @Bean
-  public Queue queue() {
-    return new Queue(QUEUE, true);
+  public TopicExchange usersExchange() {
+    return new TopicExchange(USERS_EXCHANGE);
   }
 
   @Bean
-  public TopicExchange exchange() {
-    return new TopicExchange(EXCHANGE);
+  public Queue userCreatedQueue() {
+    return new Queue(USER_CREATED_QUEUE, true);
   }
 
   @Bean
-  public Binding binding() {
+  public Binding userCreatedBinding() {
     return BindingBuilder
-        .bind(queue())
-        .to(exchange())
+        .bind(userCreatedQueue())
+        .to(usersExchange())
         .with(USER_CREATED_KEY);
   }
 
+  // ==========================================
+  // ORDERS CONFIG
+  // ==========================================
+  @Bean
+  public TopicExchange ordersExchange() {
+    return new TopicExchange(ORDERS_EXCHANGE);
+  }
+
+  @Bean
+  public Queue orderCreatedQueue() {
+    return new Queue(ORDER_CREATED_QUEUE, true);
+  }
+
+  @Bean
+  public Binding orderCreatedBinding() {
+    return BindingBuilder
+        .bind(orderCreatedQueue())
+        .to(ordersExchange())
+        .with(ORDER_CREATED_KEY);
+  }
+
+  // ==========================================
+  // JSON CONVERTER
+  // ==========================================
   @Bean
   public Jackson2JsonMessageConverter jsonConverter() {
     return new Jackson2JsonMessageConverter();

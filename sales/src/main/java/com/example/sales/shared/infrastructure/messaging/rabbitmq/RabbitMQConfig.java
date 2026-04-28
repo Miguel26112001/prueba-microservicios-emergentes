@@ -15,6 +15,9 @@ public class RabbitMQConfig {
   public static final String QUEUE = "sales.user.deleted.queue";
   public static final String ROUTING_KEY = "user.deleted";
 
+  public static final String ORDERS_EXCHANGE = "orders.exchange";
+  public static final String ORDER_CREATED_KEY = "order.created";
+
   @Bean
   public TopicExchange exchange() {
     return new TopicExchange(EXCHANGE);
@@ -31,6 +34,11 @@ public class RabbitMQConfig {
         .bind(queue())
         .to(exchange())
         .with(ROUTING_KEY);
+  }
+
+  @Bean
+  public TopicExchange ordersExchange() {
+    return new TopicExchange(ORDERS_EXCHANGE);
   }
 
   @Bean
