@@ -2,8 +2,10 @@ package com.example.media.storage.application.internal.commandservices;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.example.media.storage.application.integration.events.UserEventPublisher;
 import com.example.media.storage.domain.model.commands.DeleteUserImageCommand;
 import com.example.media.storage.domain.model.commands.UploadUserImageCommand;
+import com.example.media.storage.domain.model.events.UserImageUpdatedEvent;
 import com.example.media.storage.domain.model.responses.ImageUploadResponse;
 import com.example.media.storage.domain.services.ImageService;
 import com.example.media.storage.domain.services.UserExternalService;
@@ -16,12 +18,15 @@ public class CloudinaryImageService implements ImageService {
 
   private final Cloudinary cloudinary;
   private final UserExternalService userExternalService;
+  private final UserEventPublisher userEventPublisher;
 
   public CloudinaryImageService(
       Cloudinary cloudinary,
-      UserExternalService userExternalService) {
+      UserExternalService userExternalService,
+      UserEventPublisher userEventPublisher) {
     this.cloudinary = cloudinary;
     this.userExternalService = userExternalService;
+    this.userEventPublisher = userEventPublisher;
   }
 
   @Override
@@ -46,7 +51,17 @@ public class CloudinaryImageService implements ImageService {
           )
       );
 
-      return mapResponse(result);
+      var imageResponse = mapResponse(result);
+
+      userEventPublisher.publishUserImageUpdated(
+          new UserImageUpdatedEvent(
+              command.userId(),
+              imageResponse.imageUrl(),
+              imageResponse.publicId()
+          )
+      );
+
+      return imageResponse;
 
     } catch (Exception e) {
       throw new RuntimeException(
