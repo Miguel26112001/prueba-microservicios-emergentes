@@ -6,6 +6,7 @@ import com.example.media.storage.domain.model.commands.DeleteUserImageCommand;
 import com.example.media.storage.domain.model.commands.UploadUserImageCommand;
 import com.example.media.storage.domain.model.responses.ImageUploadResponse;
 import com.example.media.storage.domain.services.ImageService;
+import com.example.media.storage.domain.services.UserExternalService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -14,13 +15,25 @@ import java.util.Map;
 public class CloudinaryImageService implements ImageService {
 
   private final Cloudinary cloudinary;
+  private final UserExternalService userExternalService;
 
-  public CloudinaryImageService(Cloudinary cloudinary) {
+  public CloudinaryImageService(
+      Cloudinary cloudinary,
+      UserExternalService userExternalService) {
     this.cloudinary = cloudinary;
+    this.userExternalService = userExternalService;
   }
 
   @Override
   public ImageUploadResponse handle(UploadUserImageCommand command) {
+
+    var userOptional =
+        userExternalService.getUserById(command.userId());
+
+    if (userOptional.isEmpty()) {
+      throw new RuntimeException("User not found");
+    }
+
     try {
       @SuppressWarnings("unchecked")
       Map<String, Object> result = cloudinary.uploader().upload(
