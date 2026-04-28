@@ -1,4 +1,4 @@
-package com.example.media.storage.domain.model.events;
+package com.example.users.information.domain.model.events;
 
 public record UserImageUpdatedEvent(
     Long userId,

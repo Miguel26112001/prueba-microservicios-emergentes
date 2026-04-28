@@ -3,6 +3,7 @@ package com.example.users.information.application.internal.commandservices;
 import java.util.Optional;
 
 import com.example.users.information.application.integration.events.UserEventPublisher;
+import com.example.users.information.domain.model.commands.UpdateUserImageInfoCommand;
 import com.example.users.information.domain.model.events.UserCreatedEvent;
 import org.springframework.stereotype.Service;
 import com.example.users.information.domain.exceptions.EmailAlreadyExistsException;
@@ -66,6 +67,21 @@ public class UserCommandServiceImpl implements UserCommandService {
     userRepository.save(userToUpdate);
 
     return Optional.of(userToUpdate);
+  }
+
+  @Override
+  public Optional<User> handle(UpdateUserImageInfoCommand command) {
+
+    var userOptional = userRepository.findById(command.userId());
+    if (userOptional.isEmpty()) {
+      throw new UserWithIdNotFoundException(command.userId());
+    }
+
+    var user = userOptional.get();
+    user.updateImageInfo(command.imageUrl(), command.publicId());
+    userRepository.save(user);
+
+    return Optional.of(user);
   }
 
   @Override
