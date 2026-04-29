@@ -19,7 +19,7 @@
         </processorPath>
         <module name="users" />
       </profile>
-      <profile name="Annotation profile for sales" enabled="true">
+      <profile name="Annotation profile for ai" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
