@@ -230,8 +230,8 @@ services:
       SENDGRID_HOST: smtp.sendgrid.net
       SENDGRID_PORT: 587
       SENDGRID_USERNAME: apikey
-      SENDGRID_PASSWORD: sengrid-apikey
-      MAIL_FROM: miguelgomez26112001@gmail.com
+      SENDGRID_PASSWORD: SENDGRID_PASSWORD
+      MAIL_FROM: MAIL_FROM
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"
@@ -270,9 +270,9 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
-      CLOUDINARY_CLOUD_NAME: cloudinary-cloud-name
-      CLOUDINARY_API_KEY: cloudinary-api-key
-      CLOUDINARY_API_SECRET: cloudinary-api-secret
+      CLOUDINARY_CLOUD_NAME: CLOUDINARY_CLOUD_NAME
+      CLOUDINARY_API_KEY: CLOUDINARY_API_KEY
+      CLOUDINARY_API_SECRET: CLOUDINARY_API_SECRET
     networks:
       - microservices-net
     healthcheck:
@@ -281,6 +281,54 @@ services:
       timeout: 10s
       retries: 5
       start_period: 45s
+    restart: unless-stopped
+
+  # ============================================
+  # AI Service
+  # ============================================
+  ai-service:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    container_name: ai-service
+    depends_on:
+        discovery-server:
+          condition: service_healthy
+    ports:
+      - "8090:8090"
+    environment:
+      SPRING_APPLICATION_NAME: ai-service
+      SERVER_PORT: 8090
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_REGISTER: true
+      EUREKA_FETCH: true
+      EUREKA_PREFER_IP: true
+      OPENAI_BASE_URL: OPENAI_BASE_URL
+      OPENAI_API_KEY: test
+      OPENAI_MODEL: OPENAI_MODEL
+      OPENAI_TEMPERATURE: 0.2
+      OPENAI_MAX_TOKENS: 1000
+      OPENAI_TOP_P: 0.9
+      OPENAI_FREQUENCY_PENALTY: 0.0
+      OPENAI_PRESENCE_PENALTY: 0.0
+      # Gemini (opcional - comentado)
+      # GEMINI_API_KEY: GEMINI_API_KEY
+      # GEMINI_MODEL: gemini-2.5-flash
+      # GEMINI_TEMPERATURE: 0.7
+      # GEMINI_MAX_TOKENS: 2048
+      LOG_LEVEL: INFO
+      FEIGN_LOG_LEVEL: DEBUG
+      SPRING_AI_LOG_LEVEL: DEBUG
+      SPRINGDOC_API_DOCS_ENABLED: true
+      SPRINGDOC_SWAGGER_UI_ENABLED: true
+    networks:
+      - microservices-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8090/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     restart: unless-stopped
 
 networks:
