@@ -10,7 +10,7 @@
         <module name="discovery-server" />
         <module name="api-gateway" />
       </profile>
-      <profile name="Annotation profile for sales" enabled="true">
+      <profile name="Annotation profile for users" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -19,17 +19,9 @@
         </processorPath>
         <module name="ai" />
         <module name="media" />
+        <module name="users" />
         <module name="sales" />
         <module name="notifications" />
-      </profile>
-      <profile name="Annotation profile for users" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
-        </processorPath>
-        <module name="users" />
       </profile>
     </annotationProcessing>
   </component>
