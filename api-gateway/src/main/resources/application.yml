@@ -1,0 +1,69 @@
+# ============================================
+# Spring Application Configuration
+# ============================================
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: users-service
+              uri: lb://users-service
+              predicates:
+                - Path=/users/**
+              filters:
+                - StripPrefix=1
+
+            - id: sales-service
+              uri: lb://sales-service
+              predicates:
+                - Path=/sales/**
+              filters:
+                - StripPrefix=1
+
+# ============================================
+# Server Configuration
+# ============================================
+server:
+  port: ${PORT:8040}
+
+# ============================================
+# Eureka Client Configuration
+# ============================================
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+
+# ============================================
+# Management Endpoints (Actuator)
+# ============================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always
+
+# ============================================
+# Logging Configuration
+# ============================================
+logging:
+  level:
+    com.netflix.discovery: INFO
+    org.springframework.cloud.gateway: INFO
+    org.springframework.web: INFO

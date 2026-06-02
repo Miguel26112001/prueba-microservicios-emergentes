@@ -1,4 +1,4 @@
-package com.example.api_gateway;
+package com.example.api_gateway.management;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
