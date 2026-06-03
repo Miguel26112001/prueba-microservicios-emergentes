@@ -93,7 +93,7 @@ public class UserCommandServiceImpl implements UserCommandService {
       SignUpCommand command
   ) {
 
-    if (!userRepository.existsByUsername(command.username())) {
+    if (userRepository.existsByUsername(command.username())) {
       throw UserNotFoundException.withUsername(command.username());
     }
 

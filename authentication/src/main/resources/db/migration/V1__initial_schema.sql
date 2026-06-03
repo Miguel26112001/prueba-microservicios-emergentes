@@ -5,17 +5,7 @@ CREATE TABLE roles (
 
 CREATE TABLE users (
                        id BIGSERIAL PRIMARY KEY,
-
                        username VARCHAR(50) NOT NULL UNIQUE,
-                       name VARCHAR(50) NOT NULL,
-                       surname VARCHAR(50) NOT NULL,
-                       img_url VARCHAR(255) NOT NULL,
-                       email VARCHAR(255) NOT NULL UNIQUE,
-                       password VARCHAR(120) NOT NULL,
-
-                       leader_id BIGINT,
-                       member_id BIGINT,
-
                        created_at TIMESTAMP,
                        updated_at TIMESTAMP
 );

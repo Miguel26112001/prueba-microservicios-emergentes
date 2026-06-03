@@ -1,7 +1,6 @@
 package com.example.authentication.management.domain.model.entities;
 
 import com.example.authentication.management.domain.model.valueobjects.Roles;
-import com.example.authentication.shared.domain.model.entities.AuditableModel;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,15 +8,15 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
+@Getter
 @NoArgsConstructor
-public class Role extends AuditableModel {
+public class Role {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Enumerated(EnumType.STRING)
-  @Getter
   private Roles name;
 
   public Role(Roles name) {
