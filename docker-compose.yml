@@ -3,7 +3,7 @@ services:
   # ============================================
   # PostgreSQL Databases
   # ============================================
-  postgres-users:
+  postgres:
     image: postgres:17
     container_name: postgres
 
@@ -123,9 +123,6 @@ services:
       discovery-server:
         condition: service_healthy
 
-      iam-service:
-        condition: service_healthy
-
     networks:
       - microservices-net
 
@@ -138,7 +135,7 @@ services:
       dockerfile: Dockerfile
     container_name: users-service
     depends_on:
-      postgres-users:
+      postgres:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
@@ -177,7 +174,7 @@ services:
       dockerfile: Dockerfile
     container_name: sales-service
     depends_on:
-      postgres-sales:
+      postgres:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
@@ -333,17 +330,20 @@ services:
       start_period: 60s
     restart: unless-stopped
 
+
+# =========================================
+# NETWORKS
+# =========================================
 networks:
   microservices-net:
     driver: bridge
     name: microservices-net
 
+# =========================================
+# VOLUMES
+# =========================================
 volumes:
-  users_data:
-    name: users_data
-  sales_data:
-    name: sales_data
+  postgres_data:
+    name: postgres_data
   rabbitmq_data:
     name: rabbitmq_data
-  rabbitmq_logs:
-    name: rabbitmq_logs
