@@ -3,6 +3,7 @@ package com.example.authentication.management.domain.model.entities;
 import com.example.authentication.management.domain.model.valueobjects.Roles;
 import com.example.authentication.shared.domain.model.entities.AuditableModel;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class Role extends AuditableModel {
   private Long id;
 
   @Enumerated(EnumType.STRING)
+  @Getter
   private Roles name;
 
   public Role(Roles name) {
@@ -29,6 +31,7 @@ public class Role extends AuditableModel {
   public static Role getDefaultRole() {
     return new Role(Roles.ROLE_USER);
   }
+
   public static Role toRoleFromName(String name) {
     return new Role(Roles.valueOf(name));
   }
