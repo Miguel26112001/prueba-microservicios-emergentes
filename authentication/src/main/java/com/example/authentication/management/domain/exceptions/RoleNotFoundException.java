@@ -1,7 +1,5 @@
 package com.example.authentication.management.domain.exceptions;
 
-import com.example.authentication.management.domain.model.entities.Role;
-
 public class RoleNotFoundException extends RuntimeException {
 
   private RoleNotFoundException(String message) {

@@ -1,5 +1,6 @@
 package com.example.authentication.management.application.internal.queryservices;
 
+import com.example.authentication.management.domain.exceptions.UserNotFoundException;
 import com.example.authentication.management.domain.model.aggregates.User;
 import com.example.authentication.management.domain.model.queries.GetUserByIdQuery;
 import com.example.authentication.management.domain.services.UserQueryService;
@@ -30,15 +31,17 @@ public class UserQueryServiceImpl implements UserQueryService {
 
   /**
    * This method is used to handle {@link GetUserByIdQuery} query.
+   *
    * @param query {@link GetUserByIdQuery} instance.
    * @return {@link Optional} of {@link User} instance.
    * @see GetUserByIdQuery
    */
   @Override
-  public Optional<User> getUserById(
+  public User getUserById(
       GetUserByIdQuery query
   ) {
 
-    return userRepository.findUserById(query.userId());
+    return userRepository.findUserById(query.userId())
+        .orElseThrow(() -> UserNotFoundException.withId(query.userId()));
   }
 }

@@ -47,12 +47,8 @@ public class UsersController {
 
     var user = userQueryService.getUserById(getUserByIdQuery);
 
-    if (user.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-
     var resource = UserResourceFromEntityAssembler
-        .toResourceFromEntity(user.get());
+        .toResourceFromEntity(user);
 
     return ResponseEntity.ok(resource);
   }
