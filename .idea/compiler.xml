@@ -7,10 +7,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="discovery-server" />
         <module name="api-gateway" />
+        <module name="discovery-server" />
       </profile>
-      <profile name="Annotation profile for users" enabled="true">
+      <profile name="Annotation profile for authentication" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -22,6 +22,7 @@
         <module name="users" />
         <module name="sales" />
         <module name="notifications" />
+        <module name="authentication" />
       </profile>
     </annotationProcessing>
   </component>
@@ -29,6 +30,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ai" options="-parameters" />
       <module name="api-gateway" options="-parameters" />
+      <module name="authentication" options="-parameters" />
       <module name="discovery-server" options="-parameters" />
       <module name="media" options="-parameters" />
       <module name="notifications" options="-parameters" />
