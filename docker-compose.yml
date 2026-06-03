@@ -4,44 +4,30 @@ services:
   # PostgreSQL Databases
   # ============================================
   postgres-users:
-    image: postgres:16
-    container_name: postgres-users
-    restart: always
+    image: postgres:17
+    container_name: postgres
+
     environment:
-      POSTGRES_DB: users
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+
     ports:
       - "5432:5432"
+
     volumes:
-      - users_data:/var/lib/postgresql/data
-    networks:
-      - microservices-net
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    restart: unless-stopped
+
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  postgres-sales:
-    image: postgres:16
-    container_name: postgres-sales
-    restart: always
-    environment:
-      POSTGRES_DB: sales
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5433:5432"
-    volumes:
-      - sales_data:/var/lib/postgresql/data
     networks:
       - microservices-net
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   # ============================================
   # RabbitMQ Broker
@@ -49,29 +35,29 @@ services:
   rabbitmq:
     image: rabbitmq:4.2-management-alpine
     container_name: rabbitmq-broker
-    restart: unless-stopped
+
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
       RABBITMQ_DEFAULT_VHOST: /
+
     ports:
       - "5672:5672"
       - "15672:15672"
+
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-      - rabbitmq_logs:/var/log/rabbitmq
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
     networks:
       - microservices-net
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-      interval: 20s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536
 
   # ============================================
   # Eureka Discovery Server
@@ -80,52 +66,68 @@ services:
     build:
       context: ./discovery-server
       dockerfile: Dockerfile
+
     container_name: discovery-server
+
+    env_file:
+      - ./discovery-server/.env.prod
+
     ports:
       - "8761:8761"
-    environment:
-      SPRING_APPLICATION_NAME: eureka-server
-      SERVER_PORT: 8761
-      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
-      EUREKA_CLIENT_FETCH_REGISTRY: "false"
-    networks:
-      - microservices-net
+
+    restart: unless-stopped
+
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
       interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+    networks:
+      - microservices-net
 
   # ============================================
   # API Gateway
   # ============================================
-  api-gateway-server:
+  api-gateway:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
-    container_name: api-gateway-server
+
+    container_name: api-gateway
+
+    env_file:
+      - ./api-gateway/.env.prod
+
+    ports:
+      - "8080:8080"
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
     depends_on:
       discovery-server:
         condition: service_healthy
-    ports:
-      - "8040:8040"
-    environment:
-      SPRING_APPLICATION_NAME: api-gateway
-      SERVER_PORT: 8040
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
-      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+
+      iam-service:
+        condition: service_healthy
+
     networks:
       - microservices-net
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8040/actuator/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
-    restart: unless-stopped
 
   # ============================================
   # Users Service
