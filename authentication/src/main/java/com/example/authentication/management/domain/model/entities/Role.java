@@ -1,0 +1,43 @@
+package com.example.authentication.management.domain.model.entities;
+
+import com.example.authentication.management.domain.model.valueobjects.Roles;
+import com.example.authentication.shared.domain.model.entities.AuditableModel;
+import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Entity
+@NoArgsConstructor
+public class Role extends AuditableModel {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Enumerated(EnumType.STRING)
+  private Roles name;
+
+  public Role(Roles name) {
+    this.name = name;
+  }
+
+  public String getStringName() {
+    return name.name();
+  }
+
+  public static Role getDefaultRole() {
+    return new Role(Roles.ROLE_USER);
+  }
+  public static Role toRoleFromName(String name) {
+    return new Role(Roles.valueOf(name));
+  }
+
+  public static List<Role> validateRoleSet(List<Role> roles) {
+    if (roles == null || roles.isEmpty()) {
+      return List.of(getDefaultRole());
+    }
+    return roles;
+  }
+
+}
