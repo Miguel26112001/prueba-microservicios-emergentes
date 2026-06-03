@@ -1,60 +1,48 @@
-# ===========================
-#   MULTI-STAGE BUILD OPTIMIZADO
-# ===========================
-
-# ----- Build Stage -----
-FROM maven:3.9.9-eclipse-temurin-21 AS builder
+# Build stage
+FROM maven:3.9.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-# Optimización: Capa de dependencias (se cachea)
-COPY pom.xml .
-RUN mvn -q dependency:go-offline -B
+RUN --mount=type=cache,target=/root/.m2 \
+    echo "Preparing Maven cache"
 
-# Capa de código fuente
+# Copy Maven files
+COPY pom.xml .
+COPY .mvn .mvn
+
+# Copy source code
 COPY src ./src
 
-# Build con optimizaciones
-RUN mvn -q clean package -DskipTests \
-    -Dmaven.javadoc.skip=true \
-    -Dmaven.source.skip=true
+# Build application
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn clean package -DskipTests -B
 
-# ----- Run Stage -----
-FROM eclipse-temurin:21-jre-alpine AS runner
+# Runtime stage
+FROM eclipse-temurin:21-jre-alpine
 
-# Instalar herramientas útiles (opcional)
-RUN apk add --no-cache curl wget
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
-# Crear usuario no-root
-RUN addgroup -g 1000 -S appgroup && \
-    adduser -u 1000 -S appuser -G appgroup
+# Create non-root user
+RUN addgroup -S spring && adduser -S spring -G spring
 
 WORKDIR /app
 
-# Copiar jar con permisos
-COPY --from=builder --chown=appuser:appgroup /app/target/*.jar app.jar
+# Copy JAR from build stage
+COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 
-# Puerto
-EXPOSE 8080
+# Switch to non-root user
+USER spring:spring
 
-# Healthcheck (mejorado)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+# Expose port
+EXPOSE 8082
 
-# Cambiar a usuario no-root
-USER appuser
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
+  CMD curl -f http://localhost:8082/actuator/health || exit 1
 
-# JVM optimizada para contenedores
-ENTRYPOINT ["java", \
-    "-XX:+UseContainerSupport", \
-    "-XX:MaxRAMPercentage=75.0", \
-    "-XX:InitialRAMPercentage=50.0", \
-    "-XX:+UseG1GC", \
-    "-XX:+UseStringDeduplication", \
-    "-XX:+OptimizeStringConcat", \
-    "-jar", \
-    "app.jar"]
+# JVM options
+ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
 
-# Pasar variable de puerto por defecto
-ENV PORT=8080
-CMD ["--server.port=${PORT}"]
+# Run the application
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
