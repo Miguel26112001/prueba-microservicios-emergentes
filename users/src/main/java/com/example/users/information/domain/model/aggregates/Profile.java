@@ -10,19 +10,19 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import com.example.users.information.domain.model.commands.CreateUserCommand;
-import com.example.users.information.domain.model.commands.UpdateUserCommand;
+import com.example.users.information.domain.model.commands.CreateProfileCommand;
+import com.example.users.information.domain.model.commands.UpdateProfileCommand;
 import com.example.users.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
 @Entity
-@Table(name = "users")
+@Table(name = "profiles")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Schema(description = "User entity representing a system user")
-public class User extends AuditableAbstractAggregateRoot<User> {
+public class Profile extends AuditableAbstractAggregateRoot<Profile> {
 
   @Column(nullable = false, length = 100)
   @NotBlank(message = "Name is required")
@@ -61,12 +61,12 @@ public class User extends AuditableAbstractAggregateRoot<User> {
       nullable = true)
   private String publicId;
 
-  public User(CreateUserCommand command) {
+  public Profile(CreateProfileCommand command) {
     this.name = command.name();
     this.email = command.email();
   }
 
-  public void update(UpdateUserCommand command) {
+  public void update(UpdateProfileCommand command) {
     this.name = command.name();
     this.email = command.email();
   }

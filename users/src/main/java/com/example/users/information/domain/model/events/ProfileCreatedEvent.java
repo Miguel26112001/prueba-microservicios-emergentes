@@ -1,6 +1,6 @@
 package com.example.users.information.domain.model.events;
 
-public record UserCreatedEvent(
+public record ProfileCreatedEvent(
     String name,
     String email
 ) {

@@ -1,21 +1,27 @@
 package com.example.users.information.application.integration.events;
 
-import com.example.users.information.domain.model.events.UserCreatedEvent;
-import com.example.users.information.domain.model.events.UserDeletedEvent;
+import com.example.users.information.domain.model.events.ProfileCreatedEvent;
+import com.example.users.information.domain.model.events.ProfileDeletedEvent;
 import com.example.users.shared.infrastructure.messaging.rabbitmq.RabbitMQConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserEventPublisher {
+public class ProfileEventPublisher {
 
   private final RabbitTemplate rabbitTemplate;
 
-  public UserEventPublisher(RabbitTemplate rabbitTemplate) {
+  public ProfileEventPublisher(
+      RabbitTemplate rabbitTemplate
+  ) {
+
     this.rabbitTemplate = rabbitTemplate;
   }
 
-  public void publishUserCreated(UserCreatedEvent event) {
+  public void publishUserCreated(
+      ProfileCreatedEvent event
+  ) {
+
     rabbitTemplate.convertAndSend(
         RabbitMQConfig.EXCHANGE,
         RabbitMQConfig.USER_CREATED_KEY,
@@ -23,11 +29,14 @@ public class UserEventPublisher {
     );
   }
 
-  public void publish(Long userId) {
+  public void publish(
+      Long userId
+  ) {
+
     rabbitTemplate.convertAndSend(
         RabbitMQConfig.EXCHANGE,
         RabbitMQConfig.USER_DELETED_KEY,
-        new UserDeletedEvent(userId)
+        new ProfileDeletedEvent(userId)
     );
   }
 }

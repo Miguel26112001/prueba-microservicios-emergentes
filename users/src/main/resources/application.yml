@@ -4,7 +4,7 @@ server:
 
 spring:
   application:
-    name: users-service
+    name: profiles-service
 
   lifecycle:
     timeout-per-shutdown-phase: 30s

@@ -1,6 +1,6 @@
 package com.example.users.shared.interfaces.rest.resources;
 
-public record MessageResource(
+public record ErrorMessageResource(
     String timestamp,
     int status,
     String error,

@@ -17,10 +17,10 @@ spring:
               filters:
                 - StripPrefix=1
 
-            - id: users-service
-              uri: lb://users-service
+            - id: profiles-service
+              uri: lb://profiles-service
               predicates:
-                - Path=/users/**
+                - Path=/profiles/**
               filters:
                 - StripPrefix=1
 

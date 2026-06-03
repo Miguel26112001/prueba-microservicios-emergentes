@@ -24,50 +24,56 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.users.information.domain.model.commands.DeleteUserCommand;
-import com.example.users.information.domain.model.queries.GetAllUsersQuery;
-import com.example.users.information.domain.model.queries.GetUserByEmailQuery;
-import com.example.users.information.domain.model.queries.GetUserByIdQuery;
-import com.example.users.information.domain.services.UserCommandService;
-import com.example.users.information.domain.services.UserQueryService;
-import com.example.users.information.interfaces.rest.resources.CreateUserResource;
-import com.example.users.information.interfaces.rest.resources.UpdateUserResource;
-import com.example.users.information.interfaces.rest.resources.UserResource;
-import com.example.users.information.interfaces.rest.transform.CreateUserCommandFromResourceAssembler;
-import com.example.users.information.interfaces.rest.transform.UpdateUserCommandFromResourceAssembler;
-import com.example.users.information.interfaces.rest.transform.UserResourceFromEntityAssembler;
-import com.example.users.shared.interfaces.rest.resources.MessageResource;
+import com.example.users.information.domain.model.commands.DeleteProfileCommand;
+import com.example.users.information.domain.model.queries.GetAllProfileQuery;
+import com.example.users.information.domain.model.queries.GetProfileByEmailQuery;
+import com.example.users.information.domain.model.queries.GetProfileByIdQuery;
+import com.example.users.information.domain.services.ProfileCommandService;
+import com.example.users.information.domain.services.ProfileQueryService;
+import com.example.users.information.interfaces.rest.resources.CreateProfileResource;
+import com.example.users.information.interfaces.rest.resources.UpdateProfileResource;
+import com.example.users.information.interfaces.rest.resources.ProfileResource;
+import com.example.users.information.interfaces.rest.transform.CreateProfileCommandFromResourceAssembler;
+import com.example.users.information.interfaces.rest.transform.UpdateProfileCommandFromResourceAssembler;
+import com.example.users.information.interfaces.rest.transform.ProfileResourceFromEntityAssembler;
+import com.example.users.shared.interfaces.rest.resources.ErrorMessageResource;
 
 @RestController
 @RequestMapping(
-    value = "/api/v1/users",
+    value = "/api/v1/profiles",
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 @Tag(
-    name = "Users",
-    description = "API for managing user resources. Provides endpoints to retrieve user information."
+    name = "Profiles",
+    description = "API for managing profile resources. " +
+        "Provides endpoints to retrieve profile information."
 )
-public class UserController {
+public class ProfileController {
 
-  private final UserQueryService userQueryService;
-  private final UserCommandService userCommandService;
+  private final ProfileQueryService profileQueryService;
+  private final ProfileCommandService profileCommandService;
 
-  public UserController(UserQueryService userQueryService, UserCommandService userCommandService) {
-    this.userQueryService = userQueryService;
-    this.userCommandService = userCommandService;
+  public ProfileController(
+      ProfileQueryService profileQueryService,
+      ProfileCommandService profileCommandService
+  ) {
+
+    this.profileQueryService = profileQueryService;
+    this.profileCommandService = profileCommandService;
   }
 
   @GetMapping
   @Operation(
-      summary = "Get all users",
-      description = "Retrieves a list of all registered users in the system. Returns an empty array if no users exist.",
+      summary = "Get all profiles",
+      description = "Retrieves a list of all registered profiles in the system." +
+          " Returns an empty array if no profiles exist.",
       responses = {
           @ApiResponse(
               responseCode = "200",
               description = "Successfully retrieved users list",
               content = @Content(
                   mediaType = "application/json",
-                  array = @ArraySchema(schema = @Schema(implementation = UserResource.class)),
+                  array = @ArraySchema(schema = @Schema(implementation = ProfileResource.class)),
                   examples = @ExampleObject(
                       name = "Successful response",
                       value = """
@@ -89,7 +95,7 @@ public class UserController {
           ),
           @ApiResponse(
               responseCode = "204",
-              description = "No users found",
+              description = "No profiles found",
               content = @Content(
                   mediaType = "application/json",
                   examples = @ExampleObject(value = "[]")
@@ -108,7 +114,7 @@ public class UserController {
                             "error": "Internal Server Error",
                             "code": "INTERNAL_ERROR",
                             "message": "An unexpected error occurred",
-                            "path": "/api/v1/users"
+                            "path": "/api/v1/profiles"
                           }
                           """
                   )
@@ -116,35 +122,35 @@ public class UserController {
           )
       }
   )
-  public ResponseEntity<List<UserResource>> getAllUsers() {
+  public ResponseEntity<List<ProfileResource>> getAllProfiles() {
 
-    var users = userQueryService.handle(new GetAllUsersQuery());
+    var profiles = profileQueryService.handle(new GetAllProfileQuery());
 
-    var userResources = users.stream()
-        .map(UserResourceFromEntityAssembler::toResourceFromEntity)
+    var profilesResources = profiles.stream()
+        .map(ProfileResourceFromEntityAssembler::toResourceFromEntity)
         .toList();
 
-    if (userResources.isEmpty()) {
+    if (profilesResources.isEmpty()) {
       return ResponseEntity.noContent().build();
     }
 
-    return ResponseEntity.ok(userResources);
+    return ResponseEntity.ok(profilesResources);
   }
 
   @PostMapping
   @Operation(
-      summary = "Create a new user",
-      description = "Creates a new user with the provided information. The email must be unique and will be validated.",
+      summary = "Create a new profile",
+      description = "Creates a new profile with the provided information. The email must be unique and will be validated.",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "User creation data",
+          description = "Profile creation data",
           required = true,
           content = @Content(
               mediaType = "application/json",
-              schema = @Schema(implementation = CreateUserResource.class),
+              schema = @Schema(implementation = CreateProfileResource.class),
               examples = {
                   @ExampleObject(
-                      name = "Valid user example",
-                      summary = "Valid user data",
+                      name = "Valid profile example",
+                      summary = "Valid profile data",
                       value = """
                         {
                           "name": "John Doe",
@@ -177,12 +183,12 @@ public class UserController {
       responses = {
           @ApiResponse(
               responseCode = "201",
-              description = "User created successfully",
+              description = "Profile created successfully",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = UserResource.class),
+                  schema = @Schema(implementation = ProfileResource.class),
                   examples = @ExampleObject(
-                      name = "Created user response",
+                      name = "Created profile response",
                       value = """
                         {
                           "id": 1,
@@ -198,7 +204,7 @@ public class UserController {
               description = "Bad request - Invalid input data or validation failed",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = {
                       @ExampleObject(
                           name = "Validation errors",
@@ -210,7 +216,7 @@ public class UserController {
                               "error": "Validation Failed",
                               "code": "VALIDATION_ERROR",
                               "message": "Name is required, Email should be valid",
-                              "path": "/api/v1/users"
+                              "path": "/api/v1/profiles"
                             }
                             """
                       ),
@@ -224,7 +230,7 @@ public class UserController {
                               "error": "Bad Request",
                               "code": "CREATION_FAILED",
                               "message": "User could not be created",
-                              "path": "/api/v1/users"
+                              "path": "/api/v1/profiles"
                             }
                             """
                       )
@@ -236,7 +242,7 @@ public class UserController {
               description = "Conflict - Email already exists",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Duplicate email",
                       value = """
@@ -246,7 +252,7 @@ public class UserController {
                           "error": "Conflict",
                           "code": "DUPLICATE_EMAIL",
                           "message": "Email 'john.doe@example.com' is already registered",
-                          "path": "/api/v1/users"
+                          "path": "/api/v1/profiles"
                         }
                         """
                   )
@@ -257,7 +263,7 @@ public class UserController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -266,7 +272,7 @@ public class UserController {
                           "error": "Internal Server Error",
                           "code": "INTERNAL_ERROR",
                           "message": "An unexpected error occurred",
-                          "path": "/api/v1/users"
+                          "path": "/api/v1/profiles"
                         }
                         """
                   )
@@ -274,39 +280,41 @@ public class UserController {
           )
       }
   )
-  public ResponseEntity<UserResource> createUser(
-      @RequestBody @Valid CreateUserResource resource
+  public ResponseEntity<ProfileResource> createProfile(
+      @RequestBody @Valid CreateProfileResource resource
   ) {
-    var createUserCommand = CreateUserCommandFromResourceAssembler.toCommandFromResource(resource);
+    var createProfileCommand = CreateProfileCommandFromResourceAssembler.toCommandFromResource(resource);
 
-    var userOptional = userCommandService.handle(createUserCommand);
-    if (userOptional.isEmpty()) {
+    var profileOptional = profileCommandService.handle(createProfileCommand);
+    if (profileOptional.isEmpty()) {
       return ResponseEntity
           .badRequest()
           .body(null);
     }
 
-    var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
+    var profileResource = ProfileResourceFromEntityAssembler
+        .toResourceFromEntity(profileOptional.get());
 
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(userResource);
+        .body(profileResource);
   }
 
-  @PutMapping("/{userId}")
+  @PutMapping("/{profileId}")
   @Operation(
-      summary = "Update an existing user",
-      description = "Updates a user's information by their unique identifier. All fields are required for full update.",
+      summary = "Update an existing profile",
+      description = "Updates a profile's information by their unique identifier." +
+          " All fields are required for full update.",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "Updated user data",
+          description = "Updated profile data",
           required = true,
           content = @Content(
               mediaType = "application/json",
-              schema = @Schema(implementation = UpdateUserResource.class),
+              schema = @Schema(implementation = UpdateProfileResource.class),
               examples = {
                   @ExampleObject(
                       name = "Valid update example",
-                      summary = "Complete user data update",
+                      summary = "Complete profile data update",
                       value = """
                         {
                           "name": "John Updated Doe",
@@ -320,12 +328,12 @@ public class UserController {
       responses = {
           @ApiResponse(
               responseCode = "200",
-              description = "User updated successfully",
+              description = "Profile updated successfully",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = UserResource.class),
+                  schema = @Schema(implementation = ProfileResource.class),
                   examples = @ExampleObject(
-                      name = "Updated user response",
+                      name = "Updated profile response",
                       value = """
                         {
                           "id": 1,
@@ -341,7 +349,7 @@ public class UserController {
               description = "Bad request - Invalid input data",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                             {
@@ -350,7 +358,7 @@ public class UserController {
                               "error": "Validation Failed",
                               "code": "VALIDATION_ERROR",
                               "message": "Name is required, Email should be valid",
-                              "path": "/api/v1/users/1"
+                              "path": "/api/v1/profiles/1"
                             }
                             """
                       )
@@ -358,19 +366,19 @@ public class UserController {
           ),
           @ApiResponse(
               responseCode = "404",
-              description = "User not found",
+              description = "Profile not found",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                             {
                               "timestamp": "2026-04-23T00:17:20.539",
                               "status": 404,
                               "error": "Not Found",
-                              "code": "USER_NOT_FOUND",
-                              "message": "User with id 1 does not exist",
-                              "path": "/api/v1/users/1"
+                              "code": "PROFILE_NOT_FOUND",
+                              "message": "Profile with id 1 does not exist",
+                              "path": "/api/v1/profiles/1"
                             }
                             """
                   )
@@ -381,7 +389,7 @@ public class UserController {
               description = "Conflict - Email already exists",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Duplicate email",
                       value = """
@@ -390,8 +398,8 @@ public class UserController {
                           "status": 409,
                           "error": "Conflict",
                           "code": "DUPLICATE_EMAIL",
-                          "message": "Email 'john.updated@example.com' is already registered by another user",
-                          "path": "/api/v1/users/1"
+                          "message": "Email 'john.updated@example.com' is already registered by another profile",
+                          "path": "/api/v1/profiles/1"
                         }
                         """
                   )
@@ -402,7 +410,7 @@ public class UserController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -411,7 +419,7 @@ public class UserController {
                           "error": "Internal Server Error",
                           "code": "INTERNAL_ERROR",
                           "message": "An unexpected error occurred",
-                          "path": "/api/v1/users/1"
+                          "path": "/api/v1/profiles/1"
                         }
                         """
                   )
@@ -419,44 +427,44 @@ public class UserController {
           )
       }
   )
-  public ResponseEntity<UserResource> updateUser(
-      @Parameter(description = "User ID to update", example = "1", required = true)
-      @PathVariable Long userId,
-      @RequestBody @Valid UpdateUserResource resource
+  public ResponseEntity<ProfileResource> updateProfile(
+      @Parameter(description = "Profile ID to update", example = "1", required = true)
+      @PathVariable Long profileId,
+      @RequestBody @Valid UpdateProfileResource resource
   ) {
 
-    var updateUserCommand = UpdateUserCommandFromResourceAssembler.toCommandFromResource(userId, resource);
+    var updateProfileCommand = UpdateProfileCommandFromResourceAssembler.toCommandFromResource(profileId, resource);
 
-    var userOptional = userCommandService.handle(updateUserCommand);
-    if (userOptional.isEmpty()) {
+    var profileOptional = profileCommandService.handle(updateProfileCommand);
+    if (profileOptional.isEmpty()) {
       return ResponseEntity
           .badRequest()
           .body(null);
     }
 
-    var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
+    var profileResource = ProfileResourceFromEntityAssembler.toResourceFromEntity(profileOptional.get());
 
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(userResource);
+        .body(profileResource);
   }
 
-  @DeleteMapping("/{userId}")
+  @DeleteMapping("/{profileId}")
   @Operation(
-      summary = "Delete a user",
-      description = "Deletes a user by their unique identifier. This action cannot be undone.",
+      summary = "Delete a profile",
+      description = "Deletes a profile by their unique identifier. This action cannot be undone.",
       responses = {
           @ApiResponse(
               responseCode = "204",
-              description = "User deleted successfully",
+              description = "Profile deleted successfully",
               content = @Content
           ),
           @ApiResponse(
               responseCode = "404",
-              description = "User not found",
+              description = "Profile not found",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "User not found",
                       value = """
@@ -464,9 +472,9 @@ public class UserController {
                           "timestamp": "2026-04-23T00:17:20.539",
                           "status": 404,
                           "error": "Not Found",
-                          "code": "USER_NOT_FOUND",
-                          "message": "User with id 1 does not exist",
-                          "path": "/api/v1/users/1"
+                          "code": "PROFILE_NOT_FOUND",
+                          "message": "Profile with id 1 does not exist",
+                          "path": "/api/v1/profiles/1"
                         }
                         """
                   )
@@ -477,7 +485,7 @@ public class UserController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -486,7 +494,7 @@ public class UserController {
                           "error": "Internal Server Error",
                           "code": "INTERNAL_ERROR",
                           "message": "An unexpected error occurred",
-                          "path": "/api/v1/users/1"
+                          "path": "/api/v1/profiles/1"
                         }
                         """
                   )
@@ -494,33 +502,34 @@ public class UserController {
           )
       }
   )
-  public ResponseEntity<Void> deleteUser(
-      @Parameter(description = "User ID to delete", example = "1", required = true)
-      @PathVariable Long userId
+  public ResponseEntity<Void> deleteProfile(
+      @Parameter(description = "Profile ID to delete", example = "1", required = true)
+      @PathVariable Long profileId
   ) {
 
-    var deleteUserCommand = new DeleteUserCommand(userId);
+    var deleteProfileCommand = new DeleteProfileCommand(profileId);
 
-    userCommandService.handle(deleteUserCommand);
+    profileCommandService.handle(deleteProfileCommand);
 
     return ResponseEntity
         .noContent()
         .build();
   }
 
-  @GetMapping("/{userId}")
+  @GetMapping("/{profileId}")
   @Operation(
-      summary = "Get user by ID",
-      description = "Retrieves a specific user by their unique identifier. Returns detailed user information if found.",
+      summary = "Get profile by ID",
+      description = "Retrieves a specific profile by their unique identifier. " +
+          "Returns detailed profile information if found.",
       responses = {
           @ApiResponse(
               responseCode = "200",
-              description = "User found successfully",
+              description = "Profile found successfully",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = UserResource.class),
+                  schema = @Schema(implementation = ProfileResource.class),
                   examples = @ExampleObject(
-                      name = "User found",
+                      name = "Profile found",
                       value = """
                         {
                           "id": 1,
@@ -533,20 +542,20 @@ public class UserController {
           ),
           @ApiResponse(
               responseCode = "404",
-              description = "User not found",
+              description = "Profile not found",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
-                      name = "User not found",
+                      name = "Profile not found",
                       value = """
                         {
                           "timestamp": "2026-04-23T00:17:20.539",
                           "status": 404,
                           "error": "Not Found",
-                          "code": "USER_NOT_FOUND",
-                          "message": "User with id 1 does not exist",
-                          "path": "/api/v1/users/1"
+                          "code": "PROFILE_NOT_FOUND",
+                          "message": "Profile with id 1 does not exist",
+                          "path": "/api/v1/profiles/1"
                         }
                         """
                   )
@@ -554,10 +563,10 @@ public class UserController {
           ),
           @ApiResponse(
               responseCode = "400",
-              description = "Bad request - Invalid user ID format",
+              description = "Bad request - Invalid profile ID format",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Invalid ID format",
                       value = """
@@ -566,8 +575,8 @@ public class UserController {
                           "status": 400,
                           "error": "Bad Request",
                           "code": "INVALID_ID_FORMAT",
-                          "message": "Invalid user ID format",
-                          "path": "/api/v1/users/invalid"
+                          "message": "Invalid profile ID format",
+                          "path": "/api/v1/profiles/invalid"
                         }
                         """
                   )
@@ -578,7 +587,7 @@ public class UserController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -587,7 +596,7 @@ public class UserController {
                           "error": "Internal Server Error",
                           "code": "INTERNAL_ERROR",
                           "message": "An unexpected error occurred",
-                          "path": "/api/v1/users/1"
+                          "path": "/api/v1/profiles/1"
                         }
                         """
                   )
@@ -595,35 +604,37 @@ public class UserController {
           )
       }
   )
-  public ResponseEntity<UserResource> getUserById(
-      @Parameter(description = "User ID to retrieve", example = "1", required = true)
-      @PathVariable Long userId
+  public ResponseEntity<ProfileResource> getProfileById(
+      @Parameter(description = "Profile ID to retrieve", example = "1", required = true)
+      @PathVariable Long profileId
   ) {
 
-    var getUserByQIdQuery = new GetUserByIdQuery(userId);
+    var getProfileByQIdQuery = new GetProfileByIdQuery(profileId);
 
-    var userOptional = userQueryService.handle(getUserByQIdQuery);
-    if (userOptional.isEmpty()) {
+    var profileOptional = profileQueryService.handle(getProfileByQIdQuery);
+    if (profileOptional.isEmpty()) {
       return ResponseEntity
           .notFound()
           .build();
     }
 
-    var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
+    var profileResource = ProfileResourceFromEntityAssembler
+        .toResourceFromEntity(profileOptional.get());
 
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(userResource);
+        .body(profileResource);
   }
 
   @GetMapping("/email/{email}")
   @Operation(
-      summary = "Get user by email",
-      description = "Retrieves a specific user by their email address. Returns detailed user information if found.",
+      summary = "Get profile by email",
+      description = "Retrieves a specific profile by their email address." +
+          " Returns detailed profile information if found.",
       parameters = {
           @Parameter(
               name = "email",
-              description = "Email address of the user to retrieve",
+              description = "Email address of the profile to retrieve",
               example = "john.doe@example.com",
               required = true,
               schema = @Schema(type = "string", format = "email")
@@ -632,12 +643,12 @@ public class UserController {
       responses = {
           @ApiResponse(
               responseCode = "200",
-              description = "User found successfully",
+              description = "Profile found successfully",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = UserResource.class),
+                  schema = @Schema(implementation = ProfileResource.class),
                   examples = @ExampleObject(
-                      name = "User found",
+                      name = "Profile found",
                       value = """
                         {
                           "id": 1,
@@ -653,7 +664,7 @@ public class UserController {
               description = "Bad request - Invalid email format",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Invalid email format",
                       value = """
@@ -663,7 +674,7 @@ public class UserController {
                           "error": "Bad Request",
                           "code": "INVALID_EMAIL_FORMAT",
                           "message": "Invalid email format",
-                          "path": "/api/v1/users/email/2"
+                          "path": "/api/v1/profiles/email/2"
                         }
                         """
                   )
@@ -671,20 +682,20 @@ public class UserController {
           ),
           @ApiResponse(
               responseCode = "404",
-              description = "User not found with the provided email",
+              description = "Profile not found with the provided email",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
-                      name = "User not found",
+                      name = "Profile not found",
                       value = """
                         {
                           "timestamp": "2026-04-23T00:17:20.539",
                           "status": 404,
                           "error": "Not Found",
-                          "code": "USER_NOT_FOUND",
-                          "message": "User with email 'john.doe@example.com' does not exist",
-                          "path": "/api/v1/users/email/john.doe@example.com"
+                          "code": "PROFILE_NOT_FOUND",
+                          "message": "Profile with email 'john.doe@example.com' does not exist",
+                          "path": "/api/v1/profiles/email/john.doe@example.com"
                         }
                         """
                   )
@@ -695,7 +706,7 @@ public class UserController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -704,7 +715,7 @@ public class UserController {
                           "error": "Internal Server Error",
                           "code": "INTERNAL_ERROR",
                           "message": "An unexpected error occurred",
-                          "path": "/api/v1/users/email"
+                          "path": "/api/v1/profiles/email"
                         }
                         """
                   )
@@ -712,26 +723,27 @@ public class UserController {
           )
       }
   )
-  public ResponseEntity<UserResource> getUserByEmail(
+  public ResponseEntity<ProfileResource> getProfileByEmail(
       @Parameter(description = "Email address to search", example = "john.doe@example.com", required = true)
       @PathVariable
       @Email(message = "Invalid email format")
       @NotBlank(message = "Email is required") String email
   ) {
 
-    var getUserByEmailQuery = new GetUserByEmailQuery(email);
+    var getProfileByEmailQuery = new GetProfileByEmailQuery(email);
 
-    var userOptional = userQueryService.handle(getUserByEmailQuery);
-    if (userOptional.isEmpty()) {
+    var profileOptional = profileQueryService.handle(getProfileByEmailQuery);
+    if (profileOptional.isEmpty()) {
       return ResponseEntity
           .notFound()
           .build();
     }
 
-    var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
+    var profileResource = ProfileResourceFromEntityAssembler
+        .toResourceFromEntity(profileOptional.get());
 
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(userResource);
+        .body(profileResource);
   }
 }

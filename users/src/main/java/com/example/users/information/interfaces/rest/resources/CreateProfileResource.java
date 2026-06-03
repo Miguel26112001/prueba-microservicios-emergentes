@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "Resource for creating a new user")
-public record CreateUserResource(
+public record CreateProfileResource(
 
     @Schema(
         description = "Full name of the user",

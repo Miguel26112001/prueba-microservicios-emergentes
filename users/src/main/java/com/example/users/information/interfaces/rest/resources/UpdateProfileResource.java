@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "Resource for updating an existing user")
-public record UpdateUserResource(
+public record UpdateProfileResource(
     @Schema(description = "Updated full name of the user",
         example = "John Updated Doe",
         minLength = 2,
