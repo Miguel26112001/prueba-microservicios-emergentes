@@ -4,7 +4,7 @@ server:
 
 spring:
   application:
-    name: authentication-service
+    name: iam-service
 
   cloud:
     openfeign:
