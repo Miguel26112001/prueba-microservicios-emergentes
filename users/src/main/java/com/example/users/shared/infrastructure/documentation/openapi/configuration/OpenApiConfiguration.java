@@ -34,14 +34,14 @@ public class OpenApiConfiguration {
         .version("v1.0.0")
         .license(new License()
             .name("Apache 2.0")
-            .url("https://github.com/Miguel26112001/prueba-microservicios-emergentes.git"));
+            .url("https://springdoc.org"));
   }
 
   private ExternalDocumentation externalDocs() {
 
     return new ExternalDocumentation()
         .description("Profile Platform Documentation")
-        .url("https://example.com");
+        .url("https://github.com/Miguel26112001/prueba-microservicios-emergentes.git");
   }
 
   private SecurityRequirement securityRequirement() {

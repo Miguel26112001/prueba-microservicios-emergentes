@@ -6,7 +6,7 @@ import java.util.List;
 
 public record OrderResource(
   Long id,
-  Long userId,
+  Long profileId,
   LocalDateTime orderDate,
   BigDecimal total,
   List<OrderDetailResource> details

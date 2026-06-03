@@ -6,7 +6,7 @@ import java.util.List;
  * Command to create a new order
  */
 public record CreateOrderCommand(
-  Long userId,
+  Long profileId,
   List<OrderDetailCommand> details
 ) {
 }

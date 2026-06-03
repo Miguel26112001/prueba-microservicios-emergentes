@@ -34,13 +34,13 @@ import java.util.List;
 @Schema(description = "Order aggregate representing a customer purchase")
 public class Order extends AuditableAbstractAggregateRoot<Order> {
 
-  @Column(name = "user_id", nullable = false)
-  @NotNull(message = "User id is required")
+  @Column(name = "profile_id", nullable = false)
+  @NotNull(message = "Profile id is required")
   @Schema(
-    description = "Identifier of the user who placed the order",
+    description = "Identifier of the profile who placed the order",
     example = "1",
     requiredMode = Schema.RequiredMode.REQUIRED)
-  private Long userId;
+  private Long profileId;
 
   @Column(name = "order_date", nullable = false)
   @NotNull(message = "Order date is required")

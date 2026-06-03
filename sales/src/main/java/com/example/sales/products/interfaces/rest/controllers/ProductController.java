@@ -36,7 +36,7 @@ import com.example.sales.products.interfaces.rest.resources.UpdateProductResourc
 import com.example.sales.products.interfaces.rest.transform.CreateProductCommandFromResourceAssembler;
 import com.example.sales.products.interfaces.rest.transform.ProductResourceFromEntityAssembler;
 import com.example.sales.products.interfaces.rest.transform.UpdateProductCommandFromResourceAssembler;
-import com.example.sales.shared.interfaces.rest.resources.MessageResource;
+import com.example.sales.shared.interfaces.rest.resources.ErrorMessageResource;
 
 @RestController
 @RequestMapping(
@@ -107,7 +107,7 @@ public class ProductController {
               content = @Content(
                   mediaType = "application/json",
                   schema = @Schema(
-                      implementation = MessageResource.class
+                      implementation = ErrorMessageResource.class
                   ),
                   examples = @ExampleObject(
                       value = """
@@ -166,7 +166,7 @@ public class ProductController {
               description = "Bad request - Invalid product ID",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -186,7 +186,7 @@ public class ProductController {
               description = "Product not found",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -206,7 +206,7 @@ public class ProductController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -302,7 +302,7 @@ public class ProductController {
               description = "Bad request - Invalid input data",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -322,7 +322,7 @@ public class ProductController {
               description = "Conflict - Product Name already exists",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Duplicate name",
                       value = """
@@ -343,7 +343,7 @@ public class ProductController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -453,7 +453,7 @@ public class ProductController {
               description = "Bad request - Invalid input data",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = {
                       @ExampleObject(
                           name = "Validation errors",
@@ -477,7 +477,7 @@ public class ProductController {
               description = "Product not found",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Product not found",
                       value = """
@@ -498,7 +498,7 @@ public class ProductController {
               description = "Conflict - Product name already exists",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Duplicate name",
                       value = """
@@ -519,7 +519,7 @@ public class ProductController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -576,7 +576,7 @@ public class ProductController {
               description = "Product not found",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -596,7 +596,7 @@ public class ProductController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -662,7 +662,7 @@ public class ProductController {
               description = "Product not found with the provided product name",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Product not found",
                       value = """

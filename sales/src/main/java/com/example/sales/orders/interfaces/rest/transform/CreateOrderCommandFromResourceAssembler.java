@@ -20,7 +20,7 @@ public class CreateOrderCommandFromResourceAssembler {
         .toList();
 
     return new CreateOrderCommand(
-        resource.userId(),
+        resource.profileId(),
         details
     );
   }

@@ -9,10 +9,9 @@ import com.example.sales.orders.domain.model.commands.UpdateOrderCommand;
 import com.example.sales.orders.domain.model.entities.OrderDetail;
 import com.example.sales.orders.domain.model.events.OrderCreatedEvent;
 import com.example.sales.orders.domain.model.events.OrderItemEvent;
-import com.example.sales.orders.domain.model.valueobjects.ProductData;
 import com.example.sales.orders.domain.services.OrderCommandService;
 import com.example.sales.orders.domain.services.ProductExternalService;
-import com.example.sales.orders.domain.services.UserExternalService;
+import com.example.sales.orders.domain.services.ProfileExternalService;
 import com.example.sales.orders.infrastructure.persistence.jpa.repositories.OrderRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -29,16 +28,16 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
   private final OrderRepository orderRepository;
   private final ProductExternalService productExternalService;
-  private final UserExternalService userExternalService;
+  private final ProfileExternalService profileExternalService;
   private final OrderEventPublisher orderEventPublisher;
 
   public OrderCommandServiceImpl(
       OrderRepository orderRepository,
       ProductExternalService productExternalService,
-      UserExternalService userExternalService, OrderEventPublisher orderEventPublisher) {
+      ProfileExternalService profileExternalService, OrderEventPublisher orderEventPublisher) {
     this.orderRepository = orderRepository;
     this.productExternalService = productExternalService;
-    this.userExternalService = userExternalService;
+    this.profileExternalService = profileExternalService;
     this.orderEventPublisher = orderEventPublisher;
   }
 
@@ -46,14 +45,14 @@ public class OrderCommandServiceImpl implements OrderCommandService {
   public Optional<Order> handle(CreateOrderCommand command) {
 
     var userOptional =
-        userExternalService.getUserById(command.userId());
+        profileExternalService.getProfileById(command.profileId());
 
     if (userOptional.isEmpty()) {
-      throw new RuntimeException("User not found");
+      throw new RuntimeException("Profile not found");
     }
 
     var order = Order.builder()
-        .userId(command.userId())
+        .profileId(command.profileId())
         .orderDate(LocalDateTime.now())
         .total(BigDecimal.ZERO)
         .build();
@@ -63,12 +62,12 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     var savedOrder = orderRepository.save(order);
 
-    var user = userOptional.get();
+    var profile = userOptional.get();
 
     orderEventPublisher.publishOrderCreated(
         new OrderCreatedEvent(
-            user.name(),
-            user.email(),
+            profile.name(),
+            profile.email(),
             savedOrder.getOrderDate(),
             savedOrder.getTotal(),
             items

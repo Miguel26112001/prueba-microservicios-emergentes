@@ -1,4 +1,4 @@
-package com.example.sales.shared.infrastructure.documentation.persistence.jpa.configuration.strategy;
+package com.example.sales.shared.infrastructure.persistence.jpa.configuration.strategy;
 
 import static io.github.encryptorcode.pluralize.Pluralize.pluralize;
 

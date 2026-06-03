@@ -1,10 +1,14 @@
 package com.example.sales.shared.interfaces.rest.resources;
 
-public record MessageResource(
+import java.util.List;
+
+public record AuthenticationErrorResource(
     String timestamp,
     int status,
     String error,
     String code,
     String message,
-    String path) {
+    String path,
+    List<String> details
+) {
 }

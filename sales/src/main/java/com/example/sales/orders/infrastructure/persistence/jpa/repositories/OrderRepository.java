@@ -11,13 +11,13 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-  List<Order> findByUserId(Long userId);
+  List<Order> findByProfileId(Long profileId);
 
-  boolean existsByIdAndUserId(Long id, Long userId);
+  boolean existsByIdAndProfileId(Long id, Long profileId);
 
-  boolean existsByUserId(Long userId);
+  boolean existsByProfileId(Long profileId);
 
-  long countByUserId(Long userId);
+  long countByProfileId(Long profileId);
 
   List<Order> findByOrderDateBetween(
     LocalDateTime startDate,
@@ -28,5 +28,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     BigDecimal amount
   );
 
-  void deleteByUserId(Long userId);
+  void deleteByProfileId(Long profileId);
 }
