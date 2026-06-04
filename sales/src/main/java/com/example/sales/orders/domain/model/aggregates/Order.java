@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -67,8 +66,6 @@ public class Order extends AuditableAbstractAggregateRoot<Order> {
     fetch = FetchType.LAZY
   )
   @Builder.Default
-  @Size(min = 1, message = "Order must contain at least one detail")
-  @Schema(description = "List of products included in the order")
   private List<OrderDetail> details = new ArrayList<>();
 
   public void addDetail(OrderDetail detail) {

@@ -120,11 +120,19 @@ public class OrderCommandServiceImpl implements OrderCommandService {
       List<OrderDetailCommand> detailCommands
   ) {
 
+    System.out.println("ANTES DE LIMPIAR: " + order.getDetails().size());
+
     order.getDetails().clear();
+
+    System.out.println("DESPUES DE LIMPIAR: " + order.getDetails().size());
 
     List<OrderItemEvent> items = new ArrayList<>();
 
     for (OrderDetailCommand detailCommand : detailCommands) {
+
+      System.out.println(
+          "Procesando producto " + detailCommand.productId()
+      );
 
       Long productId = detailCommand.productId();
 
@@ -158,10 +166,19 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     order.calculateTotal();
 
+    System.out.println(
+        "DETALLES FINALES: " + order.getDetails().size()
+    );
+
     return items;
   }
 
   private void restoreStock(Order order) {
+
+    System.out.println(
+        "Detalles antes restore: "
+            + order.getDetails().size()
+    );
 
     for (var detail : order.getDetails()) {
 
@@ -172,6 +189,11 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     }
 
     order.getDetails().clear();
+
+    System.out.println(
+        "Detalles despues restore: "
+            + order.getDetails().size()
+    );
   }
 
   private void validateProduct(
