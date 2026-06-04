@@ -7,11 +7,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "Resource for creating a new user")
+@Schema(description = "Resource for creating a new profile")
 public record CreateProfileResource(
 
+    Long userId,
+
     @Schema(
-        description = "Full name of the user",
+        description = "Full name of the profile",
         example = "John Doe",
         minLength = 2,
         maxLength = 100,
@@ -22,7 +24,7 @@ public record CreateProfileResource(
     String name,
 
     @Schema(
-        description = "Email address of the user (must be unique)",
+        description = "Email address of the profile (must be unique)",
         example = "john.doe@example.com",
         pattern = "^[A-Za-z0-9+_.-]+@(.+)$",
         maxLength = 120,

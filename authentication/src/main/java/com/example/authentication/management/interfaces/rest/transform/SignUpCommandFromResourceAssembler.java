@@ -22,6 +22,8 @@ public class SignUpCommandFromResourceAssembler {
     return new SignUpCommand(
         resource.username(),
         resource.password(),
+        resource.name(),
+        resource.email(),
         roles
     );
   }

@@ -19,7 +19,7 @@ public class MediaEventListener {
     this.profileCommandService = profileCommandService;
   }
 
-  @RabbitListener(queues = RabbitMQConfig.USER_IMAGE_UPDATED_QUEUE)
+  @RabbitListener(queues = RabbitMQConfig.PROFILE_IMAGE_UPDATED_QUEUE)
   public void handle(ProfileImageUpdatedEvent event){
 
     var command =

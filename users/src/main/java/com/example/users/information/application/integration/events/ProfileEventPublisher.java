@@ -23,8 +23,8 @@ public class ProfileEventPublisher {
   ) {
 
     rabbitTemplate.convertAndSend(
-        RabbitMQConfig.EXCHANGE,
-        RabbitMQConfig.USER_CREATED_KEY,
+        RabbitMQConfig.PROFILES_EXCHANGE,
+        RabbitMQConfig.PROFILE_CREATED_KEY,
         event
     );
   }
@@ -34,8 +34,8 @@ public class ProfileEventPublisher {
   ) {
 
     rabbitTemplate.convertAndSend(
-        RabbitMQConfig.EXCHANGE,
-        RabbitMQConfig.USER_DELETED_KEY,
+        RabbitMQConfig.PROFILES_EXCHANGE,
+        RabbitMQConfig.PROFILE_DELETED_KEY,
         new ProfileDeletedEvent(userId)
     );
   }

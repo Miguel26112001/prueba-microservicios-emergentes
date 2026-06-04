@@ -1,11 +1,10 @@
 package com.example.users.information.domain.model.aggregates;
 
+import com.example.users.information.domain.model.valueobjects.UserId;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -13,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import com.example.users.information.domain.model.commands.CreateProfileCommand;
 import com.example.users.information.domain.model.commands.UpdateProfileCommand;
 import com.example.users.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import org.springframework.lang.Nullable;
 
 @Entity
 @Table(name = "profiles")
@@ -22,7 +22,14 @@ import com.example.users.shared.domain.model.aggregates.AuditableAbstractAggrega
 @AllArgsConstructor
 @Builder
 @Schema(description = "User entity representing a system user")
+@AttributeOverrides({
+    @AttributeOverride(name = "userId.value", column = @Column(name = "user_id"))
+})
 public class Profile extends AuditableAbstractAggregateRoot<Profile> {
+
+  @Nullable
+  @Embedded
+  private UserId userId;
 
   @Column(nullable = false, length = 100)
   @NotBlank(message = "Name is required")
@@ -62,6 +69,7 @@ public class Profile extends AuditableAbstractAggregateRoot<Profile> {
   private String publicId;
 
   public Profile(CreateProfileCommand command) {
+    this.userId = new UserId(command.userId());
     this.name = command.name();
     this.email = command.email();
   }

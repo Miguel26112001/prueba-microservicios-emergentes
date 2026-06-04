@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS profiles (
     id BIGSERIAL PRIMARY KEY,
 
+    user_id BIGINT,
+
     name VARCHAR(100) NOT NULL,
 
     email VARCHAR(120) NOT NULL UNIQUE,

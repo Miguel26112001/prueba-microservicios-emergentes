@@ -1,6 +1,7 @@
 package com.example.authentication.management.application.internal.commandservices;
 
 import com.example.authentication.management.application.internal.outboundservices.hashing.HashingService;
+import com.example.authentication.management.application.internal.outboundservices.messaging.IamEventPublisher;
 import com.example.authentication.management.application.internal.outboundservices.tokens.TokenService;
 import com.example.authentication.management.domain.exceptions.InvalidPasswordException;
 import com.example.authentication.management.domain.exceptions.RoleNotFoundException;
@@ -8,6 +9,7 @@ import com.example.authentication.management.domain.exceptions.UserNotFoundExcep
 import com.example.authentication.management.domain.model.aggregates.User;
 import com.example.authentication.management.domain.model.commands.SignInCommand;
 import com.example.authentication.management.domain.model.commands.SignUpCommand;
+import com.example.authentication.management.domain.model.events.UserCreatedEvent;
 import com.example.authentication.management.domain.services.UserCommandService;
 import com.example.authentication.management.infrastructure.authorization.sfs.model.UserDetailsImpl;
 import com.example.authentication.management.infrastructure.persistence.jpa.repositories.RoleRepository;
@@ -32,18 +34,21 @@ public class UserCommandServiceImpl implements UserCommandService {
   private final UserRepository userRepository;
   private final HashingService hashingService;
   private final TokenService tokenService;
+  private final IamEventPublisher iamEventPublisher;
 
   public UserCommandServiceImpl(
       RoleRepository roleRepository,
       UserRepository userRepository,
       HashingService hashingService,
-      TokenService tokenService
+      TokenService tokenService,
+      IamEventPublisher iamEventPublisher
   ) {
 
     this.roleRepository = roleRepository;
     this.userRepository = userRepository;
     this.hashingService = hashingService;
     this.tokenService = tokenService;
+    this.iamEventPublisher = iamEventPublisher;
   }
 
   /**
@@ -110,6 +115,15 @@ public class UserCommandServiceImpl implements UserCommandService {
     );
 
     var savedUser = userRepository.save(user);
+
+    var userCreatedEvent =
+        new UserCreatedEvent(
+            savedUser.getId(),
+            command.name(),
+            command.email()
+        );
+
+    iamEventPublisher.publishUserCreated(userCreatedEvent);
 
     return Optional.of(savedUser);
   }
