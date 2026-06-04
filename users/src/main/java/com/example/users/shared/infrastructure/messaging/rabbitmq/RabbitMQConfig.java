@@ -29,7 +29,7 @@ public class RabbitMQConfig {
   // QUEUES
   // =========================
   public static final String USER_CREATED_QUEUE = "profiles.user.created.queue";
-  public static final String PROFILE_IMAGE_UPDATED_QUEUE = "media.profile.image.updated.queue";
+  public static final String PROFILE_IMAGE_UPDATED_QUEUE = "profiles.profile.image.updated.queue";
 
   // =========================
   // EXCHANGE BEAN
