@@ -11,54 +11,59 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-  // ==========================================
-  // USERS EVENTS
-  // ==========================================
-  public static final String USERS_EXCHANGE = "users.exchange";
-  public static final String USER_CREATED_KEY = "user.created";
-  public static final String USER_CREATED_QUEUE =
-      "notification.user.created.queue";
-
-  // ==========================================
-  // ORDERS EVENTS
-  // ==========================================
+  // =========================
+  // EXCHANGES
+  // =========================
+  public static final String PROFILES_EXCHANGE = "profiles.exchange";
   public static final String ORDERS_EXCHANGE = "orders.exchange";
+
+  // =========================
+  // ROUTING KEYS
+  // =========================
+  public static final String PROFILE_CREATED_KEY = "profile.created";
   public static final String ORDER_CREATED_KEY = "order.created";
-  public static final String ORDER_CREATED_QUEUE =
-      "notification.order.created.queue";
 
-  // ==========================================
-  // USERS CONFIG
-  // ==========================================
+  // =========================
+  // QUEUES
+  // =========================
+  public static final String PROFILE_CREATED_QUEUE = "notification.profiles.created.queue";
+  public static final String ORDER_CREATED_QUEUE = "notification.order.created.queue";
+
+  // =========================
+  // EXCHANGE BEAN
+  // =========================
   @Bean
-  public TopicExchange usersExchange() {
-    return new TopicExchange(USERS_EXCHANGE);
+  public TopicExchange profilesExchange() {
+    return new TopicExchange(PROFILES_EXCHANGE);
   }
 
-  @Bean
-  public Queue userCreatedQueue() {
-    return new Queue(USER_CREATED_QUEUE, true);
-  }
-
-  @Bean
-  public Binding userCreatedBinding() {
-    return BindingBuilder
-        .bind(userCreatedQueue())
-        .to(usersExchange())
-        .with(USER_CREATED_KEY);
-  }
-
-  // ==========================================
-  // ORDERS CONFIG
-  // ==========================================
   @Bean
   public TopicExchange ordersExchange() {
     return new TopicExchange(ORDERS_EXCHANGE);
   }
 
+  // =========================
+  // QUEUE
+  // =========================
+  @Bean
+  public Queue profileCreatedQueue() {
+    return new Queue(PROFILE_CREATED_QUEUE, true);
+  }
+
   @Bean
   public Queue orderCreatedQueue() {
     return new Queue(ORDER_CREATED_QUEUE, true);
+  }
+
+  // =========================
+  // BINDING
+  // =========================
+  @Bean
+  public Binding profileCreatedBinding() {
+    return BindingBuilder
+        .bind(profileCreatedQueue())
+        .to(profilesExchange())
+        .with(PROFILE_CREATED_KEY);
   }
 
   @Bean

@@ -18,7 +18,7 @@ public class ProfileEventPublisher {
     this.rabbitTemplate = rabbitTemplate;
   }
 
-  public void publishUserCreated(
+  public void publishProfileCreated(
       ProfileCreatedEvent event
   ) {
 

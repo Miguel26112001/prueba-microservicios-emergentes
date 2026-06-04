@@ -55,7 +55,7 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
 
     var savedUser = profileRepository.save(newUser);
 
-    publisher.publishUserCreated(
+    publisher.publishProfileCreated(
         new ProfileCreatedEvent(
             newUser.getName(),
             newUser.getEmail()
@@ -80,7 +80,7 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
 
     profileRepository.save(profile);
 
-    publisher.publishUserCreated(
+    publisher.publishProfileCreated(
         new ProfileCreatedEvent(
             profile.getName(),
             profile.getEmail()
