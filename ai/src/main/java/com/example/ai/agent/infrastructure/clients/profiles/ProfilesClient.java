@@ -1,8 +1,8 @@
-package com.example.ai.agent.infrastructure.clients.users;
+package com.example.ai.agent.infrastructure.clients.profiles;
 
 import com.example.ai.agent.domain.model.responses.ProfilesResource;
-import com.example.ai.agent.infrastructure.clients.users.requests.CreateProfileRequest;
-import com.example.ai.agent.infrastructure.clients.users.requests.UpdateProfileRequest;
+import com.example.ai.agent.infrastructure.clients.profiles.requests.CreateProfileRequest;
+import com.example.ai.agent.infrastructure.clients.profiles.requests.UpdateProfileRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

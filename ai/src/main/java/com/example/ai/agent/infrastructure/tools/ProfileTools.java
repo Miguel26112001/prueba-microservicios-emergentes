@@ -1,9 +1,9 @@
 package com.example.ai.agent.infrastructure.tools;
 
 import com.example.ai.agent.domain.model.responses.ProfilesResource;
-import com.example.ai.agent.infrastructure.clients.users.ProfilesClient;
-import com.example.ai.agent.infrastructure.clients.users.requests.CreateProfileRequest;
-import com.example.ai.agent.infrastructure.clients.users.requests.UpdateProfileRequest;
+import com.example.ai.agent.infrastructure.clients.profiles.ProfilesClient;
+import com.example.ai.agent.infrastructure.clients.profiles.requests.CreateProfileRequest;
+import com.example.ai.agent.infrastructure.clients.profiles.requests.UpdateProfileRequest;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;

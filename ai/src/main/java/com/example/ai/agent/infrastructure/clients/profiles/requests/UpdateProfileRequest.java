@@ -1,4 +1,4 @@
-package com.example.ai.agent.infrastructure.clients.users.requests;
+package com.example.ai.agent.infrastructure.clients.profiles.requests;
 
 public record UpdateProfileRequest(
     String name,
