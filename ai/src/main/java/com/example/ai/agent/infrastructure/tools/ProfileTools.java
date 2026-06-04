@@ -1,9 +1,9 @@
 package com.example.ai.agent.infrastructure.tools;
 
-import com.example.ai.agent.domain.model.responses.UserResource;
-import com.example.ai.agent.infrastructure.clients.users.UsersClient;
-import com.example.ai.agent.infrastructure.clients.users.requests.CreateUserRequest;
-import com.example.ai.agent.infrastructure.clients.users.requests.UpdateUserRequest;
+import com.example.ai.agent.domain.model.responses.ProfilesResource;
+import com.example.ai.agent.infrastructure.clients.users.ProfilesClient;
+import com.example.ai.agent.infrastructure.clients.users.requests.CreateProfileRequest;
+import com.example.ai.agent.infrastructure.clients.users.requests.UpdateProfileRequest;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
@@ -13,49 +13,49 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class UserTools {
+public class ProfileTools {
 
-  private final UsersClient usersClient;
+  private final ProfilesClient profilesClient;
 
-  public UserTools(UsersClient usersClient) {
-    this.usersClient = usersClient;
+  public ProfileTools(ProfilesClient profilesClient) {
+    this.profilesClient = profilesClient;
   }
 
-  @Tool(description = "Obtiene un usuario por su ID")
-  public String getUserById(Long userId) {
+  @Tool(description = "Obtiene un perfil por su ID")
+  public String getProfileById(Long profileId) {
 
-    if (userId == null || userId <= 0) {
+    if (profileId == null || profileId <= 0) {
       return "Necesito un ID de usuario válido.";
     }
 
     try {
-      log.info("Tool getUserById -> userId={}", userId);
+      log.info("Tool getProfileById -> profileId={}", profileId);
 
-      UserResource user = usersClient.getUserById(userId);
+      ProfilesResource user = profilesClient.getProfileById(profileId);
 
       return "Encontré al usuario: " + formatUser(user);
 
     } catch (FeignException.NotFound e) {
-      log.warn("Usuario no encontrado -> id={}", userId);
-      return "No encontré ningún usuario con ID " + userId + ".";
+      log.warn("Usuario no encontrado -> id={}", profileId);
+      return "No encontré ningún usuario con ID " + profileId + ".";
 
     } catch (Exception e) {
-      log.error("Error obteniendo usuario por ID {}", userId, e);
+      log.error("Error obteniendo usuario por ID {}", profileId, e);
       return "Ocurrió un problema al buscar el usuario.";
     }
   }
 
   @Tool(description = "Obtiene un usuario por su correo electrónico")
-  public String getUserByEmail(String email) {
+  public String getProfileByEmail(String email) {
 
     if (isBlank(email)) {
       return "Necesito un correo electrónico.";
     }
 
     try {
-      log.info("Tool getUserByEmail -> email={}", email);
+      log.info("Tool getProfileByEmail -> email={}", email);
 
-      UserResource user = usersClient.getUserByEmail(email.trim());
+      ProfilesResource user = profilesClient.getProfileByEmail(email.trim());
 
       return "Encontré al usuario: " + formatUser(user);
 
@@ -70,12 +70,12 @@ public class UserTools {
   }
 
   @Tool(description = "Lista todos los usuarios registrados")
-  public String getAllUsers() {
+  public String getAllProfiles() {
 
     try {
-      log.info("Tool getAllUsers");
+      log.info("Tool getAllProfiles");
 
-      List<UserResource> users = usersClient.getAllUsers();
+      List<ProfilesResource> users = profilesClient.getAllProfiles();
 
       if (users == null || users.isEmpty()) {
         return "No hay usuarios registrados.";
@@ -83,7 +83,7 @@ public class UserTools {
 
       StringBuilder sb = new StringBuilder("Usuarios encontrados:\n");
 
-      for (UserResource user : users) {
+      for (ProfilesResource user : users) {
         sb.append("- ")
             .append(formatUser(user))
             .append("\n");
@@ -98,7 +98,7 @@ public class UserTools {
   }
 
   @Tool(description = "Crea un nuevo usuario con nombre y email")
-  public String createUser(String name, String email) {
+  public String createProfile(String name, String email) {
 
     if (isBlank(name)) {
       return "Necesito el nombre del usuario.";
@@ -109,12 +109,12 @@ public class UserTools {
     }
 
     try {
-      log.info("Tool createUser -> name={}, email={}", name, email);
+      log.info("Tool createProfile -> name={}, email={}", name, email);
 
-      CreateUserRequest request =
-          new CreateUserRequest(name.trim(), email.trim());
+      CreateProfileRequest request =
+          new CreateProfileRequest(name.trim(), email.trim());
 
-      UserResource created = usersClient.createUser(request);
+      ProfilesResource created = profilesClient.createProfile(request);
 
       return "Usuario creado correctamente: " + formatUser(created);
 
@@ -133,7 +133,7 @@ public class UserTools {
   }
 
   @Tool(description = "Actualiza un usuario existente")
-  public String updateUser(Long userId, String name, String email) {
+  public String updateProfile(Long userId, String name, String email) {
 
     if (userId == null || userId <= 0) {
       return "Necesito un ID válido para actualizar.";
@@ -148,12 +148,12 @@ public class UserTools {
     }
 
     try {
-      log.info("Tool updateUser -> id={}, name={}, email={}", userId, name, email);
+      log.info("Tool updateProfile -> id={}, name={}, email={}", userId, name, email);
 
-      UpdateUserRequest request =
-          new UpdateUserRequest(name.trim(), email.trim());
+      UpdateProfileRequest request =
+          new UpdateProfileRequest(name.trim(), email.trim());
 
-      UserResource updated = usersClient.updateUser(userId, request);
+      ProfilesResource updated = profilesClient.updateProfile(userId, request);
 
       return "Usuario actualizado correctamente: " + formatUser(updated);
 
@@ -176,16 +176,16 @@ public class UserTools {
   }
 
   @Tool(description = "Elimina un usuario por su ID")
-  public String deleteUser(Long userId) {
+  public String deleteProfile(Long userId) {
 
     if (userId == null || userId <= 0) {
       return "Necesito un ID válido para eliminar.";
     }
 
     try {
-      log.info("Tool deleteUser -> id={}", userId);
+      log.info("Tool deleteProfile -> id={}", userId);
 
-      usersClient.deleteUser(userId);
+      profilesClient.deleteProfile(userId);
 
       return "Usuario con ID " + userId + " eliminado correctamente.";
 
@@ -199,7 +199,7 @@ public class UserTools {
     }
   }
 
-  private String formatUser(UserResource user) {
+  private String formatUser(ProfilesResource user) {
     return "ID: " + user.id()
         + ", Nombre: " + user.name()
         + ", Email: " + user.email();
