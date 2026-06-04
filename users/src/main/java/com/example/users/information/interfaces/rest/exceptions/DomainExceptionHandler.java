@@ -1,6 +1,8 @@
 package com.example.users.information.interfaces.rest.exceptions;
 
 import java.time.LocalDateTime;
+
+import com.example.users.information.domain.exceptions.ProfileAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +50,25 @@ public class DomainExceptionHandler {
 
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
+        .body(response);
+  }
+
+  @ExceptionHandler(ProfileAlreadyExistsException.class)
+  public ResponseEntity<ErrorMessageResource> handleProfileAlreadyExistsException(
+      ProfileAlreadyExistsException e,
+      HttpServletRequest request) {
+
+    ErrorMessageResource response = new ErrorMessageResource(
+        LocalDateTime.now().toString(),
+        HttpStatus.CONFLICT.value(),
+        HttpStatus.CONFLICT.getReasonPhrase(),
+        "PROFILE_ALREADY_EXISTS",
+        e.getMessage(),
+        request.getRequestURI()
+    );
+
+    return ResponseEntity
+        .status(HttpStatus.CONFLICT)
         .body(response);
   }
 }

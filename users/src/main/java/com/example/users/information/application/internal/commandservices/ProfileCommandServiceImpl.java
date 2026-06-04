@@ -3,6 +3,8 @@ package com.example.users.information.application.internal.commandservices;
 import java.util.Optional;
 
 import com.example.users.information.application.integration.events.ProfileEventPublisher;
+import com.example.users.information.application.internal.outboundservices.ports.IamQueryPort;
+import com.example.users.information.domain.exceptions.ProfileAlreadyExistsException;
 import com.example.users.information.domain.model.aggregates.Profile;
 import com.example.users.information.domain.model.commands.UpdateProfileImageInfoCommand;
 import com.example.users.information.domain.model.events.ProfileCreatedEvent;
@@ -19,14 +21,17 @@ import com.example.users.information.infrastructure.persistence.jpa.repositories
 public class ProfileCommandServiceImpl implements ProfileCommandService {
 
   private final ProfileRepository profileRepository;
+  private final IamQueryPort iamQueryPort;
   private final ProfileEventPublisher publisher;
 
   public ProfileCommandServiceImpl(
       ProfileRepository profileRepository,
+      IamQueryPort iamQueryPort,
       ProfileEventPublisher publisher
   ) {
 
     this.profileRepository = profileRepository;
+    this.iamQueryPort = iamQueryPort;
     this.publisher = publisher;
   }
 
@@ -37,6 +42,16 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
 
     if (profileRepository.existsByEmail(command.email())) {
       throw new EmailAlreadyExistsException(command.email());
+    }
+
+    if (profileRepository.existsByUserId_Value(command.userId())) {
+      throw ProfileAlreadyExistsException.withUserId(command.userId());
+    }
+
+    var user = iamQueryPort.getUserById(command.userId());
+
+    if (user == null) {
+      throw new RuntimeException("User not found");
     }
 
     var newUser = new Profile(command);
