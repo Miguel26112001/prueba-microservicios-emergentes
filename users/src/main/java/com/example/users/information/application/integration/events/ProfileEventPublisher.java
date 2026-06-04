@@ -30,13 +30,13 @@ public class ProfileEventPublisher {
   }
 
   public void publish(
-      Long userId
+      Long profileId
   ) {
 
     rabbitTemplate.convertAndSend(
         RabbitMQConfig.PROFILES_EXCHANGE,
         RabbitMQConfig.PROFILE_DELETED_KEY,
-        new ProfileDeletedEvent(userId)
+        new ProfileDeletedEvent(profileId)
     );
   }
 }

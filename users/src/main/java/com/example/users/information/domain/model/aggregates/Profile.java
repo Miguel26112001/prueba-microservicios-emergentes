@@ -1,5 +1,6 @@
 package com.example.users.information.domain.model.aggregates;
 
+import com.example.users.information.domain.model.commands.CreateProfileFromEventCommand;
 import com.example.users.information.domain.model.valueobjects.UserId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -69,6 +70,12 @@ public class Profile extends AuditableAbstractAggregateRoot<Profile> {
   private String publicId;
 
   public Profile(CreateProfileCommand command) {
+    this.userId = new UserId(command.userId());
+    this.name = command.name();
+    this.email = command.email();
+  }
+
+  public Profile(CreateProfileFromEventCommand command) {
     this.userId = new UserId(command.userId());
     this.name = command.name();
     this.email = command.email();

@@ -33,7 +33,7 @@ public class CloudinaryImageService implements ImageService {
   public ImageUploadResponse handle(UploadProfileImageCommand command) {
 
     var userOptional =
-        profilesExternalService.getProfileById(command.userId());
+        profilesExternalService.getProfileById(command.profileId());
 
     if (userOptional.isEmpty()) {
       throw new RuntimeException("Profile not found");
@@ -45,7 +45,7 @@ public class CloudinaryImageService implements ImageService {
           command.file().getBytes(),
           ObjectUtils.asMap(
               "folder", "users",
-              "public_id", command.userId().toString(),
+              "public_id", command.profileId().toString(),
               "overwrite", true,
               "resource_type", "image"
           )
@@ -55,7 +55,7 @@ public class CloudinaryImageService implements ImageService {
 
       profilesEventPublisher.publishProfileImageUpdated(
           new ProfileImageUpdatedEvent(
-              command.userId(),
+              command.profileId(),
               imageResponse.imageUrl(),
               imageResponse.publicId()
           )
@@ -65,7 +65,7 @@ public class CloudinaryImageService implements ImageService {
 
     } catch (Exception e) {
       throw new RuntimeException(
-          "Error uploading image for profile id: " + command.userId(),
+          "Error uploading image for profile id: " + command.profileId(),
           e
       );
     }

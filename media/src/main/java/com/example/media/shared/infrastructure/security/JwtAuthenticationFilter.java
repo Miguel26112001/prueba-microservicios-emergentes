@@ -1,6 +1,6 @@
-package com.example.users.shared.infrastructure.security;
+package com.example.media.shared.infrastructure.security;
 
-import com.example.users.shared.interfaces.rest.resources.AuthenticatedUser;
+import com.example.media.shared.interfaces.rest.resources.AuthenticatedUser;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

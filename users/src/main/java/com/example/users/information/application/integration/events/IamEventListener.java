@@ -1,6 +1,6 @@
 package com.example.users.information.application.integration.events;
 
-import com.example.users.information.domain.model.commands.CreateProfileCommand;
+import com.example.users.information.domain.model.commands.CreateProfileFromEventCommand;
 import com.example.users.information.domain.model.events.UserCreatedEvent;
 import com.example.users.information.domain.services.ProfileCommandService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -25,7 +25,7 @@ public class IamEventListener {
       UserCreatedEvent event
   ) {
 
-    var command = new CreateProfileCommand(
+    var command = new CreateProfileFromEventCommand(
         event.userId(),
         event.name(),
         event.email()

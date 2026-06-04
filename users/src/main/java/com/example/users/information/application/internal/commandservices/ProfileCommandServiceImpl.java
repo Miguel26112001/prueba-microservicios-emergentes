@@ -6,14 +6,11 @@ import com.example.users.information.application.integration.events.ProfileEvent
 import com.example.users.information.application.internal.outboundservices.ports.IamQueryPort;
 import com.example.users.information.domain.exceptions.ProfileAlreadyExistsException;
 import com.example.users.information.domain.model.aggregates.Profile;
-import com.example.users.information.domain.model.commands.UpdateProfileImageInfoCommand;
+import com.example.users.information.domain.model.commands.*;
 import com.example.users.information.domain.model.events.ProfileCreatedEvent;
 import org.springframework.stereotype.Service;
 import com.example.users.information.domain.exceptions.EmailAlreadyExistsException;
 import com.example.users.information.domain.exceptions.ProfileWithIdNotFoundException;
-import com.example.users.information.domain.model.commands.CreateProfileCommand;
-import com.example.users.information.domain.model.commands.DeleteProfileCommand;
-import com.example.users.information.domain.model.commands.UpdateProfileCommand;
 import com.example.users.information.domain.services.ProfileCommandService;
 import com.example.users.information.infrastructure.persistence.jpa.repositories.ProfileRepository;
 
@@ -56,7 +53,7 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
 
     var newUser = new Profile(command);
 
-    profileRepository.save(newUser);
+    var savedUser = profileRepository.save(newUser);
 
     publisher.publishUserCreated(
         new ProfileCreatedEvent(
@@ -65,7 +62,30 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
         )
     );
 
-    return profileRepository.findByEmail(command.email());
+    return Optional.of(savedUser);
+  }
+
+  @Override
+  public void handle(CreateProfileFromEventCommand command) {
+
+    if (profileRepository.existsByEmail(command.email())) {
+      throw new EmailAlreadyExistsException(command.email());
+    }
+
+    if (profileRepository.existsByUserId_Value(command.userId())) {
+      throw ProfileAlreadyExistsException.withUserId(command.userId());
+    }
+
+    var profile = new Profile(command);
+
+    profileRepository.save(profile);
+
+    publisher.publishUserCreated(
+        new ProfileCreatedEvent(
+            profile.getName(),
+            profile.getEmail()
+        )
+    );
   }
 
   @Override
