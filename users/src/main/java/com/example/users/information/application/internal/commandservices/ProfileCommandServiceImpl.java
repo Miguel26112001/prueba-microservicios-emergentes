@@ -97,17 +97,17 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
       UpdateProfileImageInfoCommand command
   ) {
 
-    var userOptional = profileRepository.findById(command.userId());
+    var profileOptional = profileRepository.findById(command.profileId());
 
-    if (userOptional.isEmpty()) {
-      throw new ProfileWithIdNotFoundException(command.userId());
+    if (profileOptional.isEmpty()) {
+      throw new ProfileWithIdNotFoundException(command.profileId());
     }
 
-    var user = userOptional.get();
+    var profile = profileOptional.get();
 
-    user.updateImageInfo(command.imageUrl(), command.publicId());
+    profile.updateImageInfo(command.imageUrl(), command.publicId());
 
-    profileRepository.save(user);
+    profileRepository.save(profile);
   }
 
   @Override
@@ -115,14 +115,14 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
       DeleteProfileCommand command
   ) {
 
-    var user = profileRepository.findById(command.userId());
+    var profile = profileRepository.findById(command.profileId());
 
-    if (user.isEmpty()) {
-      throw new ProfileWithIdNotFoundException(command.userId());
+    if (profile.isEmpty()) {
+      throw new ProfileWithIdNotFoundException(command.profileId());
     }
 
-    profileRepository.delete(user.get());
+    profileRepository.delete(profile.get());
 
-    publisher.publish(command.userId());
+    publisher.publish(command.profileId());
   }
 }

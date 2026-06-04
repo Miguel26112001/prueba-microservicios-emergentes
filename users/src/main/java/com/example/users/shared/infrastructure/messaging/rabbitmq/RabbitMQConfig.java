@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
   // =========================
-  // PROFILES_EXCHANGE
+  // EXCHANGES
   // =========================
   public static final String IAM_EXCHANGE = "iam.exchange";
   public static final String PROFILES_EXCHANGE = "profiles.exchange";

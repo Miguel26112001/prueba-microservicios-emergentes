@@ -2,13 +2,13 @@ package com.example.media.storage.application.internal.commandservices;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.example.media.storage.application.integration.events.UserEventPublisher;
-import com.example.media.storage.domain.model.commands.DeleteUserImageCommand;
-import com.example.media.storage.domain.model.commands.UploadUserImageCommand;
-import com.example.media.storage.domain.model.events.UserImageUpdatedEvent;
+import com.example.media.storage.application.integration.events.ProfilesEventPublisher;
+import com.example.media.storage.domain.model.commands.DeleteProfileImageCommand;
+import com.example.media.storage.domain.model.commands.UploadProfileImageCommand;
+import com.example.media.storage.domain.model.events.ProfileImageUpdatedEvent;
 import com.example.media.storage.domain.model.responses.ImageUploadResponse;
 import com.example.media.storage.domain.services.ImageService;
-import com.example.media.storage.domain.services.UserExternalService;
+import com.example.media.storage.domain.services.ProfilesExternalService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -17,26 +17,26 @@ import java.util.Map;
 public class CloudinaryImageService implements ImageService {
 
   private final Cloudinary cloudinary;
-  private final UserExternalService userExternalService;
-  private final UserEventPublisher userEventPublisher;
+  private final ProfilesExternalService profilesExternalService;
+  private final ProfilesEventPublisher profilesEventPublisher;
 
   public CloudinaryImageService(
       Cloudinary cloudinary,
-      UserExternalService userExternalService,
-      UserEventPublisher userEventPublisher) {
+      ProfilesExternalService profilesExternalService,
+      ProfilesEventPublisher profilesEventPublisher) {
     this.cloudinary = cloudinary;
-    this.userExternalService = userExternalService;
-    this.userEventPublisher = userEventPublisher;
+    this.profilesExternalService = profilesExternalService;
+    this.profilesEventPublisher = profilesEventPublisher;
   }
 
   @Override
-  public ImageUploadResponse handle(UploadUserImageCommand command) {
+  public ImageUploadResponse handle(UploadProfileImageCommand command) {
 
     var userOptional =
-        userExternalService.getUserById(command.userId());
+        profilesExternalService.getProfileById(command.userId());
 
     if (userOptional.isEmpty()) {
-      throw new RuntimeException("User not found");
+      throw new RuntimeException("Profile not found");
     }
 
     try {
@@ -53,8 +53,8 @@ public class CloudinaryImageService implements ImageService {
 
       var imageResponse = mapResponse(result);
 
-      userEventPublisher.publishUserImageUpdated(
-          new UserImageUpdatedEvent(
+      profilesEventPublisher.publishProfileImageUpdated(
+          new ProfileImageUpdatedEvent(
               command.userId(),
               imageResponse.imageUrl(),
               imageResponse.publicId()
@@ -65,17 +65,17 @@ public class CloudinaryImageService implements ImageService {
 
     } catch (Exception e) {
       throw new RuntimeException(
-          "Error uploading image for user id: " + command.userId(),
+          "Error uploading image for profile id: " + command.userId(),
           e
       );
     }
   }
 
   @Override
-  public void handle(DeleteUserImageCommand command) {
+  public void handle(DeleteProfileImageCommand command) {
 
     var userOptional =
-        userExternalService.getUserById(command.userId());
+        profilesExternalService.getProfileById(command.userId());
 
     if (userOptional.isEmpty()) {
       throw new RuntimeException("User not found");
