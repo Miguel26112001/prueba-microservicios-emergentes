@@ -1,8 +1,11 @@
 package com.example.ai.agent.infrastructure.tools;
 
+import com.example.ai.agent.domain.model.responses.OrderResource;
 import com.example.ai.agent.domain.model.responses.ProductResource;
 import com.example.ai.agent.domain.model.responses.ToolResponse;
 import com.example.ai.agent.infrastructure.clients.sales.SalesClient;
+import com.example.ai.agent.infrastructure.clients.sales.requests.CreateOrderDetailRequest;
+import com.example.ai.agent.infrastructure.clients.sales.requests.CreateOrderRequest;
 import com.example.ai.agent.infrastructure.clients.sales.requests.CreateProductRequest;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +13,7 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -24,6 +28,8 @@ public class SalesTools {
 
     this.salesClient = salesClient;
   }
+
+  // ==================== Product Tools ====================
 
   @Tool(description = "Obtiene todos los productos registrados")
   public ToolResponse<List<ProductResource>> getAllProducts() {
@@ -301,6 +307,277 @@ public class SalesTools {
           false,
           "PRODUCT_500",
           "Error interno al buscar productos",
+          null
+      );
+    }
+  }
+
+  // ==================== Order Tools ====================
+
+  @Tool(description = "Obtiene todas las órdenes registradas")
+  public ToolResponse<List<OrderResource>> getAllOrders() {
+
+    try {
+
+      List<OrderResource> orders = salesClient.getAllOrders();
+
+      if (orders.isEmpty()) {
+        return new ToolResponse<>(
+            true,
+            "ORDER_001",
+            "No hay órdenes registradas",
+            orders
+        );
+      }
+
+      return new ToolResponse<>(
+          true,
+          "ORDER_001",
+          "Órdenes obtenidas exitosamente",
+          orders
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error obteniendo órdenes", e);
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_500",
+          "Error interno al obtener órdenes",
+          null
+      );
+    }
+  }
+
+  @Tool(description = "Obtiene una orden por su ID")
+  public ToolResponse<OrderResource> getOrderById(Long orderId) {
+
+    if (orderId == null || orderId <= 0) {
+      return new ToolResponse<>(
+          false,
+          "ORDER_400",
+          "ID de orden inválido",
+          null
+      );
+    }
+
+    try {
+
+      OrderResource order = salesClient.getOrderById(orderId);
+
+      return new ToolResponse<>(
+          true,
+          "ORDER_002",
+          "Orden encontrada",
+          order
+      );
+
+    } catch (FeignException.NotFound e) {
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_404",
+          "No se encontró una orden con el ID: " + orderId,
+          null
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error obteniendo orden por ID: {}", orderId, e);
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_500",
+          "Error interno al buscar la orden",
+          null
+      );
+    }
+  }
+
+  @Tool(description = "Obtiene todas las órdenes de un perfil específico por su ID")
+  public ToolResponse<List<OrderResource>> getOrdersByProfileId(Long profileId) {
+
+    if (profileId == null || profileId <= 0) {
+      return new ToolResponse<>(
+          false,
+          "ORDER_400",
+          "ID de perfil inválido",
+          null
+      );
+    }
+
+    try {
+
+      List<OrderResource> orders = salesClient.getOrdersByUserId(profileId);
+
+      if (orders.isEmpty()) {
+        return new ToolResponse<>(
+            true,
+            "ORDER_003",
+            "El perfil con ID " + profileId + " no tiene órdenes registradas",
+            orders
+        );
+      }
+
+      return new ToolResponse<>(
+          true,
+          "ORDER_003",
+          "Se encontraron " + orders.size() + " orden(es) para el perfil",
+          orders
+      );
+
+    } catch (FeignException.NotFound e) {
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_404",
+          "Perfil no encontrado o sin órdenes",
+          null
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error obteniendo órdenes del perfil: {}", profileId, e);
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_500",
+          "Error interno al buscar órdenes del perfil",
+          null
+      );
+    }
+  }
+
+  @Tool(description = "Crea una nueva orden para un usuario. " +
+      "Debe proporcionar userId y una lista de items con productId y quantity")
+  public ToolResponse<OrderResource> createOrder(
+      Long profileId,
+      List<CreateOrderDetailRequest> details
+  ) {
+
+    if (profileId == null || profileId <= 0) {
+      return new ToolResponse<>(
+          false,
+          "ORDER_400",
+          "ID de perfil inválido",
+          null
+      );
+    }
+
+    if (details == null || details.isEmpty()) {
+      return new ToolResponse<>(
+          false,
+          "ORDER_400",
+          "La orden debe tener al menos un item",
+          null
+      );
+    }
+
+    // Validar items
+    for (CreateOrderDetailRequest detail : details) {
+      if (detail.productId() == null || detail.productId() <= 0) {
+        return new ToolResponse<>(
+            false,
+            "ORDER_400",
+            "ID de producto inválido en los detalles",
+            null
+        );
+      }
+      if (detail.quantity() == null || detail.quantity() <= 0) {
+        return new ToolResponse<>(
+            false,
+            "ORDER_400",
+            "La cantidad debe ser mayor a 0",
+            null
+        );
+      }
+    }
+
+    try {
+
+      CreateOrderRequest request = new CreateOrderRequest(profileId, details);
+
+      OrderResource order = salesClient.createOrder(request);
+
+      return new ToolResponse<>(
+          true,
+          "ORDER_004",
+          String.format("Orden creada exitosamente. ID: %d, Total: $%.2f", order.id(), order.total()),
+          order
+      );
+
+    } catch (FeignException.BadRequest e) {
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_400",
+          "Datos de orden inválidos. Verifique que los productos existan y tengan stock suficiente",
+          null
+      );
+
+    } catch (FeignException.NotFound e) {
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_404",
+          "Perfil o producto no encontrado",
+          null
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error creando orden para perfil: {}", profileId, e);
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_500",
+          "Error interno al crear la orden",
+          null
+      );
+    }
+  }
+
+  @Tool(description = "Elimina una orden por su ID")
+  public ToolResponse<Void> deleteOrder(Long orderId) {
+
+    if (orderId == null || orderId <= 0) {
+      return new ToolResponse<>(
+          false,
+          "ORDER_400",
+          "ID de orden inválido",
+          null
+      );
+    }
+
+    try {
+
+      salesClient.deleteOrder(orderId);
+
+      return new ToolResponse<>(
+          true,
+          "ORDER_005",
+          "Orden eliminada exitosamente",
+          null
+      );
+
+    } catch (FeignException.NotFound e) {
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_404",
+          "No se encontró una orden con el ID: " + orderId,
+          null
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error eliminando orden: {}", orderId, e);
+
+      return new ToolResponse<>(
+          false,
+          "ORDER_500",
+          "Error interno al eliminar la orden",
           null
       );
     }
