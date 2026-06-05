@@ -139,6 +139,173 @@ public class SalesTools {
     }
   }
 
+  @Tool(description = "Obtiene un producto por su ID exacto")
+  public ToolResponse<ProductResource> getProductById(Long productId) {
+
+    if (productId == null || productId <= 0) {
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_400",
+          "ID de producto inválido",
+          null
+      );
+    }
+
+    try {
+
+      ProductResource product = salesClient.getProductById(productId);
+
+      return new ToolResponse<>(
+          true,
+          "PRODUCT_003",
+          "Producto obtenido por ID",
+          product
+      );
+
+    } catch (FeignException.NotFound e) {
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_404",
+          "No se encontró un producto con el ID: " + productId,
+          null
+      );
+
+    } catch (FeignException.BadRequest e) {
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_400",
+          "ID de producto inválido",
+          null
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error obteniendo producto por ID: {}", productId, e);
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_500",
+          "Error interno al buscar el producto",
+          null
+      );
+    }
+  }
+
+  @Tool(description = "Obtiene un producto por su nombre exacto (coincidencia exacta)")
+  public ToolResponse<ProductResource> getProductByName(String productName) {
+
+    if (isBlank(productName)) {
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_400",
+          "Nombre de producto requerido",
+          null
+      );
+    }
+
+    try {
+
+      ProductResource product = salesClient.getProductByName(productName.trim());
+
+      return new ToolResponse<>(
+          true,
+          "PRODUCT_004",
+          "Producto obtenido por nombre exacto",
+          product
+      );
+
+    } catch (FeignException.NotFound e) {
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_404",
+          "No se encontró un producto con el nombre exacto: '" + productName + "'",
+          null
+      );
+
+    } catch (FeignException.BadRequest e) {
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_400",
+          "Nombre de producto inválido",
+          null
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error obteniendo producto por nombre: {}", productName, e);
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_500",
+          "Error interno al buscar el producto",
+          null
+      );
+    }
+  }
+
+  @Tool(description = "Busca productos por nombre relacionado (búsqueda parcial, case-insensitive). " +
+      "Ejemplo: 'teclado' encontrará 'Teclado Logitech', 'Teclado Mecánico', etc.")
+  public ToolResponse<List<ProductResource>> getProductsByRelatedName(String searchTerm) {
+
+    if (isBlank(searchTerm)) {
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_400",
+          "Término de búsqueda requerido",
+          null
+      );
+    }
+
+    try {
+
+      List<ProductResource> products = salesClient.getProductsByRelatedName(searchTerm.trim());
+
+      if (products.isEmpty()) {
+
+        return new ToolResponse<>(
+            true,
+            "PRODUCT_005",
+            "No se encontraron productos relacionados con: '" + searchTerm + "'",
+            products
+        );
+      }
+
+      return new ToolResponse<>(
+          true,
+          "PRODUCT_005",
+          "Se encontraron " + products.size() + " producto(s) relacionado(s) con: '" + searchTerm + "'",
+          products
+      );
+
+    } catch (FeignException.BadRequest e) {
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_400",
+          "Término de búsqueda inválido",
+          null
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error buscando productos por término: {}", searchTerm, e);
+
+      return new ToolResponse<>(
+          false,
+          "PRODUCT_500",
+          "Error interno al buscar productos",
+          null
+      );
+    }
+  }
+
   private boolean isBlank(String value) {
     return value == null || value.trim().isEmpty();
   }

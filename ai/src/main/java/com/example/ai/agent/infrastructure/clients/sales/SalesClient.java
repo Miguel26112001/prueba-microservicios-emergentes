@@ -4,6 +4,7 @@ import com.example.ai.agent.domain.model.responses.ProductResource;
 import com.example.ai.agent.infrastructure.clients.sales.requests.CreateProductRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -19,4 +20,19 @@ public interface SalesClient {
 
   @GetMapping("/api/v1/products")
   List<ProductResource> getAllProducts();
+
+  @GetMapping("/api/v1/products/{productId}")
+  ProductResource getProductById(
+      @PathVariable Long productId
+  );
+
+  @GetMapping("/api/v1/products/name/{productName}")
+  ProductResource getProductByName(
+      @PathVariable String productName
+  );
+
+  @GetMapping("/api/v1/products/search/{name}")
+  List<ProductResource> getProductsByRelatedName(
+      @PathVariable String name
+  );
 }
