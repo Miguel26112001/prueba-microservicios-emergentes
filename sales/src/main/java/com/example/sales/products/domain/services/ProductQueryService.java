@@ -6,6 +6,7 @@ import com.example.sales.products.domain.model.aggregates.Product;
 import com.example.sales.products.domain.model.queries.GetAllProductsQuery;
 import com.example.sales.products.domain.model.queries.GetProductByIdQuery;
 import com.example.sales.products.domain.model.queries.GetProductByNameQuery;
+import com.example.sales.products.domain.model.queries.GetProductsByRelatedNameQuery;
 
 public interface ProductQueryService {
 
@@ -15,4 +16,5 @@ public interface ProductQueryService {
 
   Optional<Product> handle(GetProductByNameQuery query);
 
+  List<Product> handle(GetProductsByRelatedNameQuery query);
 }
