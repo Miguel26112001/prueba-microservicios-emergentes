@@ -114,6 +114,97 @@ public class ProfileTools {
     }
   }
 
+  @Tool(description = "Obtiene un perfil por su nombre exacto (coincidencia exacta)")
+  public ToolResponse<ProfilesResource> getProfileByName(String name) {
+
+    if (isBlank(name)) {
+      return new ToolResponse<>(
+          false,
+          "PROFILE_400",
+          "Nombre requerido",
+          null
+      );
+    }
+
+    try {
+
+      ProfilesResource profile =
+          profilesClient.getProfileByName(name.trim());
+
+      return new ToolResponse<>(
+          true,
+          "PROFILE_006",
+          "Perfil encontrado por nombre",
+          profile
+      );
+
+    } catch (FeignException.NotFound e) {
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_404",
+          "No se encontró un perfil con el nombre: '" + name + "'",
+          null
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error obteniendo perfil por nombre: {}", name, e);
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_500",
+          "Error interno al buscar por nombre",
+          null
+      );
+    }
+  }
+
+  @Tool(description = "Obtiene el perfil del usuario autenticado actualmente")
+  public ToolResponse<ProfilesResource> getMyProfile() {
+
+    try {
+
+      ProfilesResource profile = profilesClient.getMyProfile();
+
+      return new ToolResponse<>(
+          true,
+          "PROFILE_007",
+          "Perfil autenticado obtenido",
+          profile
+      );
+
+    } catch (FeignException.NotFound e) {
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_404",
+          "No se encontró el perfil del usuario autenticado",
+          null
+      );
+
+    } catch (FeignException.Unauthorized e) {
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_401",
+          "No autorizado. Por favor, inicia sesión primero",
+          null
+      );
+
+    } catch (Exception e) {
+
+      log.error("Error obteniendo perfil autenticado", e);
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_500",
+          "Error interno al obtener perfil autenticado",
+          null
+      );
+    }
+  }
+
   @Tool(description = "Lista todos los perfiles")
   public ToolResponse<List<ProfilesResource>> getAllProfiles() {
 
