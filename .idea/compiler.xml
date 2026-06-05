@@ -10,7 +10,7 @@
         <module name="api-gateway" />
         <module name="discovery-server" />
       </profile>
-      <profile name="Annotation profile for ai" enabled="true">
+      <profile name="Annotation profile for users" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -19,9 +19,9 @@
         </processorPath>
         <module name="ai" />
         <module name="media" />
-        <module name="notifications" />
-        <module name="sales" />
         <module name="users" />
+        <module name="sales" />
+        <module name="notifications" />
         <module name="authentication" />
       </profile>
     </annotationProcessing>
