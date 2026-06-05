@@ -1,6 +1,7 @@
 package com.example.ai.agent.infrastructure.tools;
 
 import com.example.ai.agent.domain.model.responses.ProfilesResource;
+import com.example.ai.agent.domain.model.responses.ToolResponse;
 import com.example.ai.agent.infrastructure.clients.profiles.ProfilesClient;
 import com.example.ai.agent.infrastructure.clients.profiles.requests.CreateProfileRequest;
 import com.example.ai.agent.infrastructure.clients.profiles.requests.UpdateProfileRequest;
@@ -22,194 +23,321 @@ public class ProfileTools {
   }
 
   @Tool(description = "Obtiene un perfil por su ID")
-  public String getProfileById(Long profileId) {
+  public ToolResponse<ProfilesResource> getProfileById(Long profileId) {
 
     if (profileId == null || profileId <= 0) {
-      return "Necesito un ID de usuario válido.";
+      return new ToolResponse<>(
+          false,
+          "PROFILE_400",
+          "ID de usuario inválido",
+          null
+      );
     }
 
     try {
-      log.info("Tool getProfileById -> profileId={}", profileId);
 
-      ProfilesResource user = profilesClient.getProfileById(profileId);
+      ProfilesResource profile =
+          profilesClient.getProfileById(profileId);
 
-      return "Encontré al usuario: " + formatUser(user);
+      return new ToolResponse<>(
+          true,
+          "PROFILE_001",
+          "Perfil encontrado",
+          profile
+      );
 
     } catch (FeignException.NotFound e) {
-      log.warn("Usuario no encontrado -> id={}", profileId);
-      return "No encontré ningún usuario con ID " + profileId + ".";
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_002",
+          "Perfil no encontrado",
+          null
+      );
 
     } catch (Exception e) {
-      log.error("Error obteniendo usuario por ID {}", profileId, e);
-      return "Ocurrió un problema al buscar el usuario.";
+
+      log.error("Error obteniendo perfil {}", profileId, e);
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_500",
+          "Error interno",
+          null
+      );
     }
   }
 
-  @Tool(description = "Obtiene un usuario por su correo electrónico")
-  public String getProfileByEmail(String email) {
+  @Tool(description = "Obtiene un perfil por email")
+  public ToolResponse<ProfilesResource> getProfileByEmail(String email) {
 
-    if (isBlank(email)) {
-      return "Necesito un correo electrónico.";
+    if (isInvalidEmail(email)) {
+      return new ToolResponse<>(
+          false,
+          "PROFILE_400",
+          "Email inválido",
+          null
+      );
     }
 
     try {
-      log.info("Tool getProfileByEmail -> email={}", email);
 
-      ProfilesResource user = profilesClient.getProfileByEmail(email.trim());
+      ProfilesResource profile =
+          profilesClient.getProfileByEmail(email.trim());
 
-      return "Encontré al usuario: " + formatUser(user);
+      return new ToolResponse<>(
+          true,
+          "PROFILE_001",
+          "Perfil encontrado",
+          profile
+      );
 
     } catch (FeignException.NotFound e) {
-      log.warn("Usuario no encontrado -> email={}", email);
-      return "No encontré ningún usuario con correo " + email + ".";
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_002",
+          "Perfil no encontrado",
+          null
+      );
 
     } catch (Exception e) {
-      log.error("Error obteniendo usuario por email {}", email, e);
-      return "Ocurrió un problema al buscar el usuario.";
+
+      log.error("Error obteniendo perfil por email {}", email, e);
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_500",
+          "Error interno",
+          null
+      );
     }
   }
 
-  @Tool(description = "Lista todos los usuarios registrados")
-  public String getAllProfiles() {
+  @Tool(description = "Lista todos los perfiles")
+  public ToolResponse<List<ProfilesResource>> getAllProfiles() {
 
     try {
-      log.info("Tool getAllProfiles");
 
-      List<ProfilesResource> users = profilesClient.getAllProfiles();
+      List<ProfilesResource> profiles =
+          profilesClient.getAllProfiles();
 
-      if (users == null || users.isEmpty()) {
-        return "No hay usuarios registrados.";
-      }
-
-      StringBuilder sb = new StringBuilder("Usuarios encontrados:\n");
-
-      for (ProfilesResource user : users) {
-        sb.append("- ")
-            .append(formatUser(user))
-            .append("\n");
-      }
-
-      return sb.toString();
+      return new ToolResponse<>(
+          true,
+          "PROFILE_001",
+          "Perfiles obtenidos",
+          profiles
+      );
 
     } catch (Exception e) {
-      log.error("Error listando usuarios", e);
-      return "No pude obtener la lista de usuarios en este momento.";
+
+      log.error("Error obteniendo perfiles", e);
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_500",
+          "Error interno",
+          null
+      );
     }
   }
 
-  @Tool(description = "Crea un nuevo usuario con nombre y email")
-  public String createProfile(String name, String email) {
+  @Tool(description = "Crea un nuevo perfil")
+  public ToolResponse<ProfilesResource> createProfile(
+      String name,
+      String email
+  ) {
 
     if (isBlank(name)) {
-      return "Necesito el nombre del usuario.";
+      return new ToolResponse<>(
+          false,
+          "PROFILE_400",
+          "Nombre requerido",
+          null
+      );
     }
 
-    if (isValidEmail(email)) {
-      return "Necesito un correo electrónico válido.";
+    if (isInvalidEmail(email)) {
+      return new ToolResponse<>(
+          false,
+          "PROFILE_400",
+          "Email inválido",
+          null
+      );
     }
 
     try {
-      log.info("Tool createProfile -> name={}, email={}", name, email);
 
-      CreateProfileRequest request =
-          new CreateProfileRequest(name.trim(), email.trim());
+      ProfilesResource profile =
+          profilesClient.createProfile(
+              new CreateProfileRequest(
+                  name.trim(),
+                  email.trim()
+              )
+          );
 
-      ProfilesResource created = profilesClient.createProfile(request);
-
-      return "Usuario creado correctamente: " + formatUser(created);
+      return new ToolResponse<>(
+          true,
+          "PROFILE_003",
+          "Perfil creado",
+          profile
+      );
 
     } catch (FeignException.Conflict e) {
-      log.warn("Email duplicado -> {}", email);
-      return "No pude crear el usuario porque ese correo ya está registrado.";
 
-    } catch (FeignException.BadRequest e) {
-      log.warn("Datos inválidos al crear usuario");
-      return "Los datos enviados no son válidos para crear el usuario.";
+      return new ToolResponse<>(
+          false,
+          "PROFILE_409",
+          "El email ya existe",
+          null
+      );
 
     } catch (Exception e) {
-      log.error("Error creando usuario", e);
-      return "Ocurrió un problema al crear el usuario.";
+
+      log.error("Error creando perfil", e);
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_500",
+          "Error interno",
+          null
+      );
     }
   }
 
-  @Tool(description = "Actualiza un usuario existente")
-  public String updateProfile(Long userId, String name, String email) {
+  @Tool(description = "Actualiza un perfil")
+  public ToolResponse<ProfilesResource> updateProfile(
+      Long userId,
+      String name,
+      String email
+  ) {
 
     if (userId == null || userId <= 0) {
-      return "Necesito un ID válido para actualizar.";
+      return new ToolResponse<>(
+          false,
+          "PROFILE_400",
+          "ID inválido",
+          null
+      );
     }
 
     if (isBlank(name)) {
-      return "Necesito el nuevo nombre del usuario.";
+      return new ToolResponse<>(
+          false,
+          "PROFILE_400",
+          "Nombre requerido",
+          null
+      );
     }
 
-    if (isValidEmail(email)) {
-      return "Necesito un correo electrónico válido.";
+    if (isInvalidEmail(email)) {
+      return new ToolResponse<>(
+          false,
+          "PROFILE_400",
+          "Email inválido",
+          null
+      );
     }
 
     try {
-      log.info("Tool updateProfile -> id={}, name={}, email={}", userId, name, email);
 
-      UpdateProfileRequest request =
-          new UpdateProfileRequest(name.trim(), email.trim());
+      ProfilesResource profile =
+          profilesClient.updateProfile(
+              userId,
+              new UpdateProfileRequest(
+                  name.trim(),
+                  email.trim()
+              )
+          );
 
-      ProfilesResource updated = profilesClient.updateProfile(userId, request);
-
-      return "Usuario actualizado correctamente: " + formatUser(updated);
+      return new ToolResponse<>(
+          true,
+          "PROFILE_004",
+          "Perfil actualizado",
+          profile
+      );
 
     } catch (FeignException.NotFound e) {
-      log.warn("Usuario no encontrado para update -> id={}", userId);
-      return "No encontré ningún usuario con ID " + userId + " para actualizar.";
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_002",
+          "Perfil no encontrado",
+          null
+      );
 
     } catch (FeignException.Conflict e) {
-      log.warn("Email duplicado en update -> {}", email);
-      return "No pude actualizar el usuario porque ese correo ya está en uso.";
 
-    } catch (FeignException.BadRequest e) {
-      log.warn("Datos inválidos en update");
-      return "Los datos enviados no son válidos para actualizar el usuario.";
+      return new ToolResponse<>(
+          false,
+          "PROFILE_409",
+          "Email ya registrado",
+          null
+      );
 
     } catch (Exception e) {
-      log.error("Error actualizando usuario {}", userId, e);
-      return "Ocurrió un problema al actualizar el usuario.";
+
+      log.error("Error actualizando perfil {}", userId, e);
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_500",
+          "Error interno",
+          null
+      );
     }
   }
 
-  @Tool(description = "Elimina un usuario por su ID")
-  public String deleteProfile(Long userId) {
+  @Tool(description = "Elimina un perfil")
+  public ToolResponse<Void> deleteProfile(Long userId) {
 
     if (userId == null || userId <= 0) {
-      return "Necesito un ID válido para eliminar.";
+      return new ToolResponse<>(
+          false,
+          "PROFILE_400",
+          "ID inválido",
+          null
+      );
     }
 
     try {
-      log.info("Tool deleteProfile -> id={}", userId);
 
       profilesClient.deleteProfile(userId);
 
-      return "Usuario con ID " + userId + " eliminado correctamente.";
+      return new ToolResponse<>(
+          true,
+          "PROFILE_005",
+          "Perfil eliminado",
+          null
+      );
 
     } catch (FeignException.NotFound e) {
-      log.warn("Usuario no encontrado para delete -> id={}", userId);
-      return "No encontré ningún usuario con ID " + userId + ".";
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_002",
+          "Perfil no encontrado",
+          null
+      );
 
     } catch (Exception e) {
-      log.error("Error eliminando usuario {}", userId, e);
-      return "Ocurrió un problema al eliminar el usuario.";
-    }
-  }
 
-  private String formatUser(ProfilesResource user) {
-    return "ID: " + user.id()
-        + ", Nombre: " + user.name()
-        + ", Email: " + user.email();
+      log.error("Error eliminando perfil {}", userId, e);
+
+      return new ToolResponse<>(
+          false,
+          "PROFILE_500",
+          "Error interno",
+          null
+      );
+    }
   }
 
   private boolean isBlank(String value) {
     return value == null || value.trim().isEmpty();
   }
 
-  private boolean isValidEmail(String email) {
+  private boolean isInvalidEmail(String email) {
     return isBlank(email) || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
   }
 }
