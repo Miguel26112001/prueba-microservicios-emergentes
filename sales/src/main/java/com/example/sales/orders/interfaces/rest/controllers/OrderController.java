@@ -11,6 +11,7 @@ import com.example.sales.orders.interfaces.rest.resources.UpdateOrderResource;
 import com.example.sales.orders.interfaces.rest.transform.CreateOrderCommandFromResourceAssembler;
 import com.example.sales.orders.interfaces.rest.transform.OrderResourceFromEntityAssembler;
 import com.example.sales.orders.interfaces.rest.transform.UpdateOrderCommandFromResourceAssembler;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +31,10 @@ import java.util.List;
 @RequestMapping(
     value = "/api/v1/orders",
     produces = MediaType.APPLICATION_JSON_VALUE
+)
+@Tag(
+    name = "Orders",
+    description = "API for managing orders resources. Provides endpoints to retrieve orders information."
 )
 public class OrderController {
 

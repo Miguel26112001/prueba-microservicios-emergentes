@@ -1,0 +1,105 @@
+# ============================================
+# Spring Application Configuration
+# ============================================
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: iam-service
+              uri: lb://iam-service
+              predicates:
+                - Path=/iam/**
+              filters:
+                - StripPrefix=1
+
+            - id: profiles-service
+              uri: lb://profiles-service
+              predicates:
+                - Path=/profiles/**
+              filters:
+                - StripPrefix=1
+
+            - id: sales-service
+              uri: lb://sales-service
+              predicates:
+                - Path=/sales/**
+              filters:
+                - StripPrefix=1
+
+            - id: media-service
+              uri: lb://media-service
+              predicates:
+                - Path=/media/**
+              filters:
+                - StripPrefix=1
+
+            - id: ai-service
+              uri: lb://ai-service
+              predicates:
+                - Path=/ai/**
+              filters:
+                - StripPrefix=1
+
+# ============================================
+# Server Configuration
+# ============================================
+server:
+  port: ${PORT:8080}
+
+# ============================================
+# Eureka Client Configuration
+# ============================================
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+
+# ============================================
+# Management Endpoints (Actuator)
+# ============================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always
+
+# ============================================
+# Logging Configuration
+# ============================================
+logging:
+  level:
+    com.netflix.discovery: INFO
+    org.springframework.cloud.gateway: INFO
+    org.springframework.web: INFO
+
+# ============================================
+# Authorization Configuration
+# ============================================
+authorization:
+  jwt:
+    secret: ${JWT_SECRET:dev-ecommerce-jwt-secret-key-2026-local-development}
+    issuer: ${JWT_ISSUER:ecommerce-dev}
+    audience: ${JWT_AUDIENCE:ecommerce-web}
+
+  public-paths:
+    - /**/api/v1/authentication/sign-in
+    - /**/api/v1/authentication/sign-up
+    - /actuator/**
+    - /ping

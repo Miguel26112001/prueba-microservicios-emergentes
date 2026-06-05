@@ -11,28 +11,71 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-  public static final String EXCHANGE = "users.exchange";
+  // =========================
+  // EXCHANGES
+  // =========================
+  public static final String IAM_EXCHANGE = "iam.exchange";
+  public static final String PROFILES_EXCHANGE = "profiles.exchange";
+
+  // =========================
+  // ROUTING KEYS
+  // =========================
   public static final String USER_CREATED_KEY = "user.created";
-  public static final String USER_DELETED_KEY = "user.deleted";
-  public static final String USER_IMAGE_UPDATED_KEY = "user.image.updated";
-  public static final String USER_IMAGE_UPDATED_QUEUE = "media.user.image.updated.queue";
+  public static final String PROFILE_CREATED_KEY = "profile.created";
+  public static final String PROFILE_DELETED_KEY = "profile.deleted";
+  public static final String PROFILE_IMAGE_UPDATED_KEY = "profile.image.updated";
 
+  // =========================
+  // QUEUES
+  // =========================
+  public static final String USER_CREATED_QUEUE = "profiles.user.created.queue";
+  public static final String PROFILE_IMAGE_UPDATED_QUEUE = "profiles.profile.image.updated.queue";
+
+  // =========================
+  // EXCHANGE BEAN
+  // =========================
   @Bean
-  public TopicExchange exchange() {
-    return new TopicExchange(EXCHANGE);
+  public TopicExchange iamExchange() {
+    return new TopicExchange(IAM_EXCHANGE);
   }
 
   @Bean
-  public Queue mediaQueue() {
-    return new Queue(USER_IMAGE_UPDATED_QUEUE);
+  public TopicExchange profilesExchange() {
+    return new TopicExchange(PROFILES_EXCHANGE);
+  }
+
+  // =========================
+  // QUEUE
+  // =========================
+  @Bean
+  public Queue userCreatedQueue() {
+    return new Queue(USER_CREATED_QUEUE);
   }
 
   @Bean
-  public Binding mediaBinding() {
+  public Queue profileImageUpdatedQueue() {
+    return new Queue(PROFILE_IMAGE_UPDATED_QUEUE);
+  }
+
+  // =========================
+  // BINDING
+  // =========================
+  @Bean
+  public Binding userCreatedBinding() {
+
     return BindingBuilder
-        .bind(mediaQueue())
-        .to(exchange())
-        .with(USER_IMAGE_UPDATED_KEY);
+        .bind(userCreatedQueue())
+        .to(iamExchange())
+        .with(USER_CREATED_KEY);
+  }
+
+  @Bean
+  public Binding profileImageUpdatedBinding() {
+
+    return BindingBuilder
+        .bind(profileImageUpdatedQueue())
+        .to(profilesExchange())
+        .with(PROFILE_IMAGE_UPDATED_KEY);
   }
 
   @Bean

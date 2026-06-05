@@ -9,17 +9,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import com.example.users.shared.interfaces.rest.resources.MessageResource;
+import com.example.users.shared.interfaces.rest.resources.ErrorMessageResource;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<MessageResource> handleMethodArgumentNotValidException(
+  public ResponseEntity<ErrorMessageResource> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException e,
       HttpServletRequest request) {
 
-    MessageResource error = new MessageResource(
+    ErrorMessageResource error = new ErrorMessageResource(
         LocalDateTime.now().toString(),
         HttpStatus.BAD_REQUEST.value(),
         HttpStatus.BAD_REQUEST.getReasonPhrase(),
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<MessageResource> handleConstraintViolationException(
+  public ResponseEntity<ErrorMessageResource> handleConstraintViolationException(
       ConstraintViolationException e,
       HttpServletRequest request) {
 
@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
             violation.getPropertyPath() + ": " + violation.getMessage())
         .collect(Collectors.joining(", "));
 
-    MessageResource error = new MessageResource(
+    ErrorMessageResource error = new ErrorMessageResource(
         LocalDateTime.now().toString(),
         HttpStatus.BAD_REQUEST.value(),
         HttpStatus.BAD_REQUEST.getReasonPhrase(),

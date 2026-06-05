@@ -16,7 +16,7 @@ public class OrderResourceFromEntityAssembler {
 
     return new OrderResource(
         entity.getId(),
-        entity.getUserId(),
+        entity.getProfileId(),
         entity.getOrderDate(),
         entity.getTotal(),
         detailResources

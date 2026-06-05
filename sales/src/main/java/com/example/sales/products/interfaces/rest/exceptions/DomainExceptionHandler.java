@@ -8,17 +8,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.example.sales.products.domain.exceptions.NameAlreadyExistsException;
 import com.example.sales.products.domain.exceptions.ProductNotFoundException;
-import com.example.sales.shared.interfaces.rest.resources.MessageResource;
+import com.example.sales.shared.interfaces.rest.resources.ErrorMessageResource;
 
 @RestControllerAdvice
 public class DomainExceptionHandler {
 
   @ExceptionHandler(ProductNotFoundException.class)
-  public ResponseEntity<MessageResource> handleProductNotFoundException(
+  public ResponseEntity<ErrorMessageResource> handleProductNotFoundException(
       ProductNotFoundException e,
       HttpServletRequest request) {
 
-    MessageResource response = new MessageResource(
+    ErrorMessageResource response = new ErrorMessageResource(
         LocalDateTime.now().toString(),
         HttpStatus.NOT_FOUND.value(),
         HttpStatus.NOT_FOUND.getReasonPhrase(),
@@ -33,11 +33,11 @@ public class DomainExceptionHandler {
   }
 
   @ExceptionHandler(NameAlreadyExistsException.class)
-  public ResponseEntity<MessageResource> handleNameAlreadyExistsException(
+  public ResponseEntity<ErrorMessageResource> handleNameAlreadyExistsException(
       NameAlreadyExistsException e,
       HttpServletRequest request) {
 
-    MessageResource response = new MessageResource(
+    ErrorMessageResource response = new ErrorMessageResource(
         LocalDateTime.now().toString(),
         HttpStatus.CONFLICT.value(),
         HttpStatus.CONFLICT.getReasonPhrase(),

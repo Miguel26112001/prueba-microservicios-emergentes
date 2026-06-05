@@ -22,6 +22,7 @@ public class SendGridEmailService implements EmailService {
   public SendGridEmailService(
       JavaMailSender mailSender,
       TemplateEngine templateEngine) {
+
     this.mailSender = mailSender;
     this.templateEngine = templateEngine;
   }

@@ -7,8 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record CreateOrderResource(
-  @NotNull(message = "User id is required")
-  Long userId,
+  @NotNull(message = "Profile id is required")
+  Long profileId,
 
   @Valid
   @NotEmpty(message = "Order must contain at least one detail")

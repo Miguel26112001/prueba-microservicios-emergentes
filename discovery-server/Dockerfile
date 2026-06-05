@@ -1,41 +1,48 @@
-# ===========================
-#   EUREKA DISCOVERY SERVER
-# ===========================
-
-FROM maven:3.9.9-eclipse-temurin-21 AS builder
+# Build stage
+FROM maven:3.9.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
+RUN --mount=type=cache,target=/root/.m2 \
+    echo "Preparing Maven cache"
+
+# Copy Maven files
 COPY pom.xml .
-RUN mvn -q dependency:go-offline -B
+COPY .mvn .mvn
 
+# Copy source code
 COPY src ./src
-RUN mvn -q clean package -DskipTests
 
-# ===========================
+# Build application
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn clean package -DskipTests -B
+
+# Runtime stage
 FROM eclipse-temurin:21-jre-alpine
 
-# Herramientas para healthcheck
+# Install curl for healthcheck
 RUN apk add --no-cache curl
 
-RUN addgroup -g 1000 -S eureka && \
-    adduser -u 1000 -S eureka -G eureka
+# Create non-root user
+RUN addgroup -S spring && adduser -S spring -G spring
 
 WORKDIR /app
 
-COPY --from=builder --chown=eureka:eureka /app/target/*.jar app.jar
+# Copy JAR from build stage
+COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 
+# Switch to non-root user
+USER spring:spring
+
+# Expose Eureka port
 EXPOSE 8761
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8761/actuator/health || exit 1
 
-USER eureka
+# JVM options
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseContainerSupport"
 
-ENTRYPOINT ["java", \
-    "-XX:+UseContainerSupport", \
-    "-XX:MaxRAMPercentage=75.0", \
-    "-jar", \
-    "app.jar"]
-
-ENV PORT=8761
+# Run the application
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

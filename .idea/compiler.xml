@@ -10,15 +10,6 @@
         <module name="api-gateway" />
         <module name="discovery-server" />
       </profile>
-      <profile name="Annotation profile for users" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
-        </processorPath>
-        <module name="users" />
-      </profile>
       <profile name="Annotation profile for ai" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -28,8 +19,10 @@
         </processorPath>
         <module name="ai" />
         <module name="media" />
-        <module name="sales" />
         <module name="notifications" />
+        <module name="sales" />
+        <module name="users" />
+        <module name="authentication" />
       </profile>
     </annotationProcessing>
   </component>
@@ -37,6 +30,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ai" options="-parameters" />
       <module name="api-gateway" options="-parameters" />
+      <module name="authentication" options="-parameters" />
       <module name="discovery-server" options="-parameters" />
       <module name="media" options="-parameters" />
       <module name="notifications" options="-parameters" />

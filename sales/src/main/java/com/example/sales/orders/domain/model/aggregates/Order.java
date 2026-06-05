@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,13 +33,13 @@ import java.util.List;
 @Schema(description = "Order aggregate representing a customer purchase")
 public class Order extends AuditableAbstractAggregateRoot<Order> {
 
-  @Column(name = "user_id", nullable = false)
-  @NotNull(message = "User id is required")
+  @Column(name = "profile_id", nullable = false)
+  @NotNull(message = "Profile id is required")
   @Schema(
-    description = "Identifier of the user who placed the order",
+    description = "Identifier of the profile who placed the order",
     example = "1",
     requiredMode = Schema.RequiredMode.REQUIRED)
-  private Long userId;
+  private Long profileId;
 
   @Column(name = "order_date", nullable = false)
   @NotNull(message = "Order date is required")
@@ -67,8 +66,6 @@ public class Order extends AuditableAbstractAggregateRoot<Order> {
     fetch = FetchType.LAZY
   )
   @Builder.Default
-  @Size(min = 1, message = "Order must contain at least one detail")
-  @Schema(description = "List of products included in the order")
   private List<OrderDetail> details = new ArrayList<>();
 
   public void addDetail(OrderDetail detail) {

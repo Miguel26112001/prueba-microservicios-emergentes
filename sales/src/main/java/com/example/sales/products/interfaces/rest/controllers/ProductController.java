@@ -1,5 +1,6 @@
 package com.example.sales.products.interfaces.rest.controllers;
 
+import com.example.sales.products.domain.model.queries.GetProductsByRelatedNameQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -36,7 +37,7 @@ import com.example.sales.products.interfaces.rest.resources.UpdateProductResourc
 import com.example.sales.products.interfaces.rest.transform.CreateProductCommandFromResourceAssembler;
 import com.example.sales.products.interfaces.rest.transform.ProductResourceFromEntityAssembler;
 import com.example.sales.products.interfaces.rest.transform.UpdateProductCommandFromResourceAssembler;
-import com.example.sales.shared.interfaces.rest.resources.MessageResource;
+import com.example.sales.shared.interfaces.rest.resources.ErrorMessageResource;
 
 @RestController
 @RequestMapping(
@@ -107,7 +108,7 @@ public class ProductController {
               content = @Content(
                   mediaType = "application/json",
                   schema = @Schema(
-                      implementation = MessageResource.class
+                      implementation = ErrorMessageResource.class
                   ),
                   examples = @ExampleObject(
                       value = """
@@ -166,7 +167,7 @@ public class ProductController {
               description = "Bad request - Invalid product ID",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -186,7 +187,7 @@ public class ProductController {
               description = "Product not found",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -206,7 +207,7 @@ public class ProductController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -302,7 +303,7 @@ public class ProductController {
               description = "Bad request - Invalid input data",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -322,7 +323,7 @@ public class ProductController {
               description = "Conflict - Product Name already exists",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Duplicate name",
                       value = """
@@ -343,7 +344,7 @@ public class ProductController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -453,7 +454,7 @@ public class ProductController {
               description = "Bad request - Invalid input data",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = {
                       @ExampleObject(
                           name = "Validation errors",
@@ -477,7 +478,7 @@ public class ProductController {
               description = "Product not found",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Product not found",
                       value = """
@@ -498,7 +499,7 @@ public class ProductController {
               description = "Conflict - Product name already exists",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Duplicate name",
                       value = """
@@ -519,7 +520,7 @@ public class ProductController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -576,7 +577,7 @@ public class ProductController {
               description = "Product not found",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -596,7 +597,7 @@ public class ProductController {
               description = "Internal server error",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       value = """
                         {
@@ -662,7 +663,7 @@ public class ProductController {
               description = "Product not found with the provided product name",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = MessageResource.class),
+                  schema = @Schema(implementation = ErrorMessageResource.class),
                   examples = @ExampleObject(
                       name = "Product not found",
                       value = """
@@ -701,5 +702,121 @@ public class ProductController {
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(productResource);
+  }
+
+  @GetMapping("/search/{name}")
+  @Operation(
+      summary = "Search products by related name",
+      description = "Retrieves a list of products whose names contain the search term (case-insensitive). " +
+          "Returns products like 'Teclado Logitech', 'Teclado Mecánico', etc. when searching for 'teclado'.",
+      parameters = {
+          @Parameter(
+              name = "name",
+              description = "Search term for product name (partial match)",
+              example = "teclado",
+              required = true,
+              schema = @Schema(type = "string")
+          )
+      },
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Products found successfully",
+              content = @Content(
+                  mediaType = "application/json",
+                  array = @ArraySchema(
+                      schema = @Schema(implementation = ProductResource.class)
+                  ),
+                  examples = {
+                      @ExampleObject(
+                          name = "Products found",
+                          value = """
+                          [
+                            {
+                              "id": 1,
+                              "name": "Teclado Logitech K120",
+                              "price": 29.99,
+                              "stock": 15
+                            },
+                            {
+                              "id": 2,
+                              "name": "Teclado Mecánico RGB",
+                              "price": 89.99,
+                              "stock": 8
+                            },
+                            {
+                              "id": 3,
+                              "name": "Teclado Inalámbrico Apple",
+                              "price": 129.99,
+                              "stock": 5
+                            }
+                          ]
+                          """
+                      ),
+                      @ExampleObject(
+                          name = "No products found",
+                          value = "[]"
+                      )
+                  }
+              )
+          ),
+          @ApiResponse(
+              responseCode = "400",
+              description = "Bad request - Invalid search term",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorMessageResource.class),
+                  examples = @ExampleObject(
+                      value = """
+                      {
+                        "timestamp": "2026-04-23T00:17:20.539",
+                        "status": 400,
+                        "error": "Bad Request",
+                        "code": "INVALID_SEARCH_TERM",
+                        "message": "Search term cannot be blank",
+                        "path": "/api/v1/products/search/"
+                      }
+                      """
+                  )
+              )
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "Internal server error",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorMessageResource.class),
+                  examples = @ExampleObject(
+                      value = """
+                      {
+                        "timestamp": "2026-04-23T00:17:20.539",
+                        "status": 500,
+                        "error": "Internal Server Error",
+                        "code": "INTERNAL_ERROR",
+                        "message": "An unexpected error occurred",
+                        "path": "/api/v1/products/search/teclado"
+                      }
+                      """
+                  )
+              )
+          )
+      }
+  )
+  public ResponseEntity<List<ProductResource>> getProductsByRelatedName(
+      @Parameter(description = "Search term for product name (partial match)",
+          example = "teclado",
+          required = true)
+      @PathVariable
+      @NotBlank(message = "Search term is required") String name
+  ) {
+    var getProductsByRelatedNameQuery = new GetProductsByRelatedNameQuery(name);
+
+    var products = productQueryService.handle(getProductsByRelatedNameQuery);
+
+    var productResources = products.stream()
+        .map(ProductResourceFromEntityAssembler::toResourceFromEntity)
+        .toList();
+
+    return ResponseEntity.ok(productResources);
   }
 }

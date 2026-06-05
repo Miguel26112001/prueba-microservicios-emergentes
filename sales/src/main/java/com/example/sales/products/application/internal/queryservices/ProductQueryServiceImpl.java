@@ -2,6 +2,8 @@ package com.example.sales.products.application.internal.queryservices;
 
 import java.util.List;
 import java.util.Optional;
+
+import com.example.sales.products.domain.model.queries.GetProductsByRelatedNameQuery;
 import org.springframework.stereotype.Service;
 import com.example.sales.products.domain.exceptions.ProductNotFoundException;
 import com.example.sales.products.domain.exceptions.ProductWithIdNotFoundException;
@@ -23,12 +25,17 @@ public class ProductQueryServiceImpl implements ProductQueryService {
   }
 
   @Override
-  public List<Product> handle(GetAllProductsQuery query) {
+  public List<Product> handle(
+      GetAllProductsQuery query
+  ) {
+
     return productRepository.findAll();
   }
 
   @Override
-  public Optional<Product> handle(GetProductByIdQuery query) {
+  public Optional<Product> handle(
+      GetProductByIdQuery query
+  ) {
 
     var productOptional = productRepository.findById(query.productId());
     if (productOptional.isEmpty()) {
@@ -39,13 +46,27 @@ public class ProductQueryServiceImpl implements ProductQueryService {
   }
 
   @Override
-  public Optional<Product> handle(GetProductByNameQuery query) {
+  public Optional<Product> handle(
+      GetProductByNameQuery query
+  ) {
 
     var productOptional = productRepository.findByName(query.name());
+
     if (productOptional.isEmpty()) {
       throw new ProductWithNameNotFoundException(query.name());
     }
 
     return productOptional;
+  }
+
+  @Override
+  public List<Product> handle(
+      GetProductsByRelatedNameQuery query
+  ) {
+
+    return productRepository
+        .findByNameContainingIgnoreCase(
+            query.name()
+        );
   }
 }

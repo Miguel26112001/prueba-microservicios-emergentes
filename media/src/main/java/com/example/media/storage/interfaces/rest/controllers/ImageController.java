@@ -1,7 +1,7 @@
 package com.example.media.storage.interfaces.rest.controllers;
 
-import com.example.media.storage.domain.model.commands.DeleteUserImageCommand;
-import com.example.media.storage.domain.model.commands.UploadUserImageCommand;
+import com.example.media.storage.domain.model.commands.DeleteProfileImageCommand;
+import com.example.media.storage.domain.model.commands.UploadProfileImageCommand;
 import com.example.media.storage.domain.services.ImageService;
 import com.example.media.storage.interfaces.rest.resources.ImageUploadResource;
 import com.example.media.storage.interfaces.rest.transform.ImageUploadResourceFromResponseAssembler;
@@ -25,15 +25,15 @@ public class ImageController {
   }
 
   @PutMapping(
-      value = "/users/{userId}",
+      value = "/profiles/{profileId}",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE
   )
-  public ResponseEntity<ImageUploadResource> uploadUserImage(
-      @PathVariable Long userId,
+  public ResponseEntity<ImageUploadResource> uploadProfileImage(
+      @PathVariable Long profileId,
       @RequestParam("file") MultipartFile file
   ) {
 
-    var command = new UploadUserImageCommand(userId, file);
+    var command = new UploadProfileImageCommand(profileId, file);
 
     var response = imageService.handle(command);
 
@@ -43,13 +43,13 @@ public class ImageController {
     return ResponseEntity.ok(resource);
   }
 
-  @DeleteMapping("/users/{userId}")
-  public ResponseEntity<Void> deleteUserImage(
-      @Parameter(description = "User ID image to delete", example = "1", required = true)
-      @PathVariable Long userId
+  @DeleteMapping("/profiles/{profileId}")
+  public ResponseEntity<Void> deleteProfileImage(
+      @Parameter(description = "Profile ID image to delete", example = "1", required = true)
+      @PathVariable Long profileId
   ) {
 
-    var command = new DeleteUserImageCommand(userId);
+    var command = new DeleteProfileImageCommand(profileId);
 
     imageService.handle(command);
 
