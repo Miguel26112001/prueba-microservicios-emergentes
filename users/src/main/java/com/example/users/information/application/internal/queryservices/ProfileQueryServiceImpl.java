@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.users.information.domain.model.aggregates.Profile;
+import com.example.users.information.domain.model.queries.GetProfileByNameQuery;
 import org.springframework.stereotype.Service;
 import com.example.users.information.domain.exceptions.ProfileWithEmailNotFoundException;
 import com.example.users.information.domain.exceptions.ProfileWithIdNotFoundException;
@@ -58,6 +59,16 @@ public class ProfileQueryServiceImpl implements ProfileQueryService {
       throw new ProfileWithEmailNotFoundException(query.email());
     }
 
-    return profileRepository.findByEmail(query.email());
+    return profileRepository
+        .findByEmail(query.email());
+  }
+
+  @Override
+  public Optional<Profile> handle(
+      GetProfileByNameQuery query
+  ) {
+
+    return profileRepository
+        .findByName(query.name());
   }
 }

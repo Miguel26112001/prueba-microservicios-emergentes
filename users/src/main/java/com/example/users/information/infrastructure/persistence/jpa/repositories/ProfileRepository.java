@@ -17,4 +17,6 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
   boolean existsByIdNotAndEmail(Long id, String email);
 
   boolean existsByUserId_Value(Long userId);
+
+  Optional<Profile> findByName(String name);
 }

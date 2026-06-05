@@ -1,5 +1,6 @@
 package com.example.users.information.interfaces.rest.controllers;
 
+import com.example.users.information.domain.model.queries.GetProfileByNameQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -733,6 +734,127 @@ public class ProfileController {
     var getProfileByEmailQuery = new GetProfileByEmailQuery(email);
 
     var profileOptional = profileQueryService.handle(getProfileByEmailQuery);
+    if (profileOptional.isEmpty()) {
+      return ResponseEntity
+          .notFound()
+          .build();
+    }
+
+    var profileResource = ProfileResourceFromEntityAssembler
+        .toResourceFromEntity(profileOptional.get());
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(profileResource);
+  }
+
+  @GetMapping("/name/{name}")
+  @Operation(
+      summary = "Get profile by name",
+      description = "Retrieves a specific profile by their name. " +
+          "Returns detailed profile information if found.",
+      parameters = {
+          @Parameter(
+              name = "name",
+              description = "Name of the profile to retrieve",
+              example = "John Doe",
+              required = true,
+              schema = @Schema(type = "string")
+          )
+      },
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Profile found successfully",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ProfileResource.class),
+                  examples = @ExampleObject(
+                      name = "Profile found",
+                      value = """
+                        {
+                          "id": 1,
+                          "name": "John Doe",
+                          "email": "john.doe@example.com"
+                        }
+                        """
+                  )
+              )
+          ),
+          @ApiResponse(
+              responseCode = "400",
+              description = "Bad request - Invalid name format",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorMessageResource.class),
+                  examples = @ExampleObject(
+                      name = "Invalid name",
+                      value = """
+                        {
+                          "timestamp": "2026-04-23T00:17:20.539",
+                          "status": 400,
+                          "error": "Bad Request",
+                          "code": "INVALID_NAME",
+                          "message": "Name cannot be blank",
+                          "path": "/api/v1/profiles/name/"
+                        }
+                        """
+                  )
+              )
+          ),
+          @ApiResponse(
+              responseCode = "404",
+              description = "Profile not found with the provided name",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorMessageResource.class),
+                  examples = @ExampleObject(
+                      name = "Profile not found",
+                      value = """
+                        {
+                          "timestamp": "2026-04-23T00:17:20.539",
+                          "status": 404,
+                          "error": "Not Found",
+                          "code": "PROFILE_NOT_FOUND",
+                          "message": "Profile with name 'John Doe' does not exist",
+                          "path": "/api/v1/profiles/name/John%20Doe"
+                        }
+                        """
+                  )
+              )
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "Internal server error",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorMessageResource.class),
+                  examples = @ExampleObject(
+                      value = """
+                        {
+                          "timestamp": "2026-04-23T00:17:20.539",
+                          "status": 500,
+                          "error": "Internal Server Error",
+                          "code": "INTERNAL_ERROR",
+                          "message": "An unexpected error occurred",
+                          "path": "/api/v1/profiles/name/John%20Doe"
+                        }
+                        """
+                  )
+              )
+          )
+      }
+  )
+  public ResponseEntity<ProfileResource> getProfileByName(
+      @Parameter(description = "Name of the profile to retrieve",
+          example = "John Doe",
+          required = true)
+      @PathVariable
+      @NotBlank(message = "Name is required") String name
+  ) {
+    var getProfileByNameQuery = new GetProfileByNameQuery(name);
+
+    var profileOptional = profileQueryService.handle(getProfileByNameQuery);
     if (profileOptional.isEmpty()) {
       return ResponseEntity
           .notFound()

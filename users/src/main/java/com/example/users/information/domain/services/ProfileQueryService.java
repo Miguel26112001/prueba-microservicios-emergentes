@@ -7,6 +7,7 @@ import com.example.users.information.domain.model.aggregates.Profile;
 import com.example.users.information.domain.model.queries.GetAllProfileQuery;
 import com.example.users.information.domain.model.queries.GetProfileByEmailQuery;
 import com.example.users.information.domain.model.queries.GetProfileByIdQuery;
+import com.example.users.information.domain.model.queries.GetProfileByNameQuery;
 
 public interface ProfileQueryService {
 
@@ -15,4 +16,6 @@ public interface ProfileQueryService {
   Optional<Profile> handle(GetProfileByIdQuery query);
 
   Optional<Profile> handle(GetProfileByEmailQuery query);
+
+  Optional<Profile> handle(GetProfileByNameQuery query);
 }
