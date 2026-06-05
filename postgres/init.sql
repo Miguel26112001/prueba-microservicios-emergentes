@@ -1,2 +1,3 @@
-CREATE DATABASE users;
+CREATE DATABASE authentication;
+CREATE DATABASE profiles;
 CREATE DATABASE sales;

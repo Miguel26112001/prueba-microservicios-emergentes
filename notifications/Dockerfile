@@ -1,60 +1,48 @@
-# ============================================
-# STAGE 1: Build con Maven
-# ============================================
-FROM maven:3.9.9-eclipse-temurin-21 AS builder
+# Build stage
+FROM maven:3.9.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-# Copiar pom.xml primero (mejor caché)
+RUN --mount=type=cache,target=/root/.m2 \
+    echo "Preparing Maven cache"
+
+# Copy Maven files
 COPY pom.xml .
+COPY .mvn .mvn
 
-# Descargar dependencias (se cachea si pom.xml no cambia)
-RUN mvn -q dependency:go-offline -B
-
-# Copiar código fuente
+# Copy source code
 COPY src ./src
 
-# Construir el JAR
-RUN mvn -q clean package -DskipTests
+# Build application
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn clean package -DskipTests -B
 
-# ============================================
-# STAGE 2: Runtime con JRE
-# ============================================
+# Runtime stage
 FROM eclipse-temurin:21-jre-alpine
 
-# Instalar herramientas necesarias
-RUN apk add --no-cache curl wget
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
-# Crear usuario no-root por seguridad
-RUN addgroup -g 1000 -S appgroup && \
-    adduser -u 1000 -S appuser -G appgroup
+# Create non-root user
+RUN addgroup -S spring && adduser -S spring -G spring
 
 WORKDIR /app
 
-# Copiar JAR desde el stage builder
-COPY --from=builder --chown=appuser:appgroup /app/target/*.jar app.jar
+# Copy JAR from build stage
+COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 
-# Exponer puerto
-EXPOSE 8070
+# Switch to non-root user
+USER spring:spring
+
+# Expose port
+EXPOSE 8085
 
 # Healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
-  CMD curl -f http://localhost:8070/actuator/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
+  CMD curl -f http://localhost:8085/actuator/health || exit 1
 
-# Cambiar a usuario no-root
-USER appuser
+# JVM options
+ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
 
-# JVM optimizada para contenedores
-ENTRYPOINT ["java", \
-    "-XX:+UseContainerSupport", \
-    "-XX:MaxRAMPercentage=75.0", \
-    "-XX:InitialRAMPercentage=50.0", \
-    "-XX:+UseG1GC", \
-    "-XX:+UseStringDeduplication", \
-    "-XX:+OptimizeStringConcat", \
-    "-jar", \
-    "app.jar"]
-
-# Pasar variable de puerto
-ENV PORT=8070
-ENV SERVER_PORT=8070
+# Run the application
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
