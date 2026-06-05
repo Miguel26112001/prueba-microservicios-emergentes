@@ -19,4 +19,6 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
   boolean existsByUserId_Value(Long userId);
 
   Optional<Profile> findByName(String name);
+
+  Optional<Profile> findByUserId_Value(Long userId);
 }

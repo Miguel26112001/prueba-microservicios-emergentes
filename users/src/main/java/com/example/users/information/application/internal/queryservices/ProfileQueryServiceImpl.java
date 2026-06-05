@@ -4,13 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.users.information.domain.model.aggregates.Profile;
-import com.example.users.information.domain.model.queries.GetProfileByNameQuery;
+import com.example.users.information.domain.model.queries.*;
 import org.springframework.stereotype.Service;
 import com.example.users.information.domain.exceptions.ProfileWithEmailNotFoundException;
 import com.example.users.information.domain.exceptions.ProfileWithIdNotFoundException;
-import com.example.users.information.domain.model.queries.GetAllProfileQuery;
-import com.example.users.information.domain.model.queries.GetProfileByEmailQuery;
-import com.example.users.information.domain.model.queries.GetProfileByIdQuery;
 import com.example.users.information.domain.services.ProfileQueryService;
 import com.example.users.information.infrastructure.persistence.jpa.repositories.ProfileRepository;
 
@@ -70,5 +67,14 @@ public class ProfileQueryServiceImpl implements ProfileQueryService {
 
     return profileRepository
         .findByName(query.name());
+  }
+
+  @Override
+  public Optional<Profile> handle(
+      GetMyProfileQuery query
+  ) {
+
+    return profileRepository
+        .findByUserId_Value(query.userId());
   }
 }

@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.users.information.domain.model.aggregates.Profile;
-import com.example.users.information.domain.model.queries.GetAllProfileQuery;
-import com.example.users.information.domain.model.queries.GetProfileByEmailQuery;
-import com.example.users.information.domain.model.queries.GetProfileByIdQuery;
-import com.example.users.information.domain.model.queries.GetProfileByNameQuery;
+import com.example.users.information.domain.model.queries.*;
 
 public interface ProfileQueryService {
 
@@ -18,4 +15,6 @@ public interface ProfileQueryService {
   Optional<Profile> handle(GetProfileByEmailQuery query);
 
   Optional<Profile> handle(GetProfileByNameQuery query);
+
+  Optional<Profile> handle(GetMyProfileQuery query);
 }
