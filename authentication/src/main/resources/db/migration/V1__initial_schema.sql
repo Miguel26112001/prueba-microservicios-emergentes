@@ -6,6 +6,7 @@ CREATE TABLE roles (
 CREATE TABLE users (
                        id BIGSERIAL PRIMARY KEY,
                        username VARCHAR(50) NOT NULL UNIQUE,
+                       password VARCHAR(120) NOT NULL,
                        created_at TIMESTAMP,
                        updated_at TIMESTAMP
 );
